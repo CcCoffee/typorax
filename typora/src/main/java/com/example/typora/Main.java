@@ -110,6 +110,16 @@ public class Main extends Application {
 
             File selectedFile = fileChooser.showOpenDialog(primaryStage);
             if (selectedFile != null) {
+                // 检查文件是否已经被打开
+                for (Tab tab : tabPane.getTabs()) {
+                    TabInfo tabInfo = (TabInfo) tab.getUserData();
+                    if (tabInfo.getFilePath().equals(selectedFile.getAbsolutePath())) {
+                        // 切换到已打开的标签
+                        tabPane.getSelectionModel().select(tab);
+                        return;
+                    }
+                }
+
                 try {
                     String content = new String(Files.readAllBytes(Paths.get(selectedFile.getPath())));
                     createNewTab(selectedFile.getName(), content, selectedFile.getAbsolutePath());
