@@ -118,17 +118,24 @@ public class Main extends Application {
             Tab tab = new Tab(title);
             BorderPane tabContent = new BorderPane();
 
-            TextArea markdownArea = new TextArea(content);
+            TextArea editArea = new TextArea(content);
             WebView preview = new WebView();
 
-            markdownArea.textProperty().addListener((observable, oldValue, newValue) -> {
-                updatePreview(newValue, preview);
-                TabInfo tabInfo = (TabInfo) tab.getUserData();
-                tabInfo.setModified(!newValue.equals(tabInfo.getContent()));
-            });
+            boolean isMarkdown = filePath.toLowerCase().endsWith(".md");
 
-            tabContent.setLeft(markdownArea);
-            tabContent.setCenter(preview);
+            if (isMarkdown) {
+                editArea.textProperty().addListener((observable, oldValue, newValue) -> {
+                    updatePreview(newValue, preview);
+                    TabInfo tabInfo = (TabInfo) tab.getUserData();
+                    tabInfo.setModified(!newValue.equals(tabInfo.getContent()));
+                });
+
+                tabContent.setLeft(editArea);
+                tabContent.setCenter(preview);
+                updatePreview(content, preview);
+            } else {
+                tabContent.setCenter(editArea);
+            }
 
             tab.setContent(tabContent);
             tab.setUserData(new TabInfo(title, content, filePath));
@@ -226,12 +233,14 @@ public class Main extends Application {
         private String content;
         private String filePath;
         private boolean modified;
+        private boolean isMarkdown;
 
         public TabInfo(String title, String content, String filePath) {
             this.title = title;
             this.content = content;
             this.filePath = filePath;
             this.modified = false;
+            this.isMarkdown = filePath.toLowerCase().endsWith(".md");
         }
 
         public String getTitle() { return title; }
@@ -239,6 +248,7 @@ public class Main extends Application {
         public String getFilePath() { return filePath; }
         public boolean isModified() { return modified; }
         public void setModified(boolean modified) { this.modified = modified; }
+        public boolean isMarkdown() { return isMarkdown; }
     }
 
     static class SessionManager {
