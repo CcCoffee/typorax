@@ -1,4 +1,4 @@
-package com.example.typorax.component;
+package com.example.typorax.model;
 
 import java.io.Serializable;
 

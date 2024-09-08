@@ -7,11 +7,11 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 
 public class StatusBar extends HBox {
-    private Label statusBarLineCol;
-    private Label statusBarCharCount;
-    private Label statusBarEOL;
-    private Label statusBarEncoding;
-    private Label messageLabel;
+    private final Label statusBarLineCol;
+    private final Label statusBarCharCount;
+    private final Label statusBarEOL;
+    private final Label statusBarEncoding;
+    private final Label messageLabel;
 
     public StatusBar() {
         statusBarLineCol = new Label("行: 1 列: 1");
@@ -43,7 +43,7 @@ public class StatusBar extends HBox {
         int caretPosition = textArea.getCaretPosition();
         
         // 计算行号和列号
-        int rowNum = (text.isEmpty()) ? 1 : text.substring(0, caretPosition).split("\n", -1).length;
+        int rowNum = (text.isEmpty()) ? 1 : text.substring(0, Math.min(text.length(), caretPosition)).split("\n", -1).length;
         int lastNewlineIndex = text.lastIndexOf('\n', caretPosition - 1);
         int colNum = (lastNewlineIndex == -1) ? caretPosition + 1 : caretPosition - lastNewlineIndex;
 

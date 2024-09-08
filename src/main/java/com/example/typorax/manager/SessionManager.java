@@ -1,4 +1,9 @@
-package com.example.typorax.component;
+package com.example.typorax.manager;
+
+import com.example.typorax.component.CustomTabPane;
+import com.example.typorax.model.TabInfo;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -21,5 +26,15 @@ public class SessionManager {
         } catch (IOException | ClassNotFoundException e) {
             return new ArrayList<>();
         }
+    }
+
+    public static void saveSession(CustomTabPane tabPane) {
+        List<TabInfo> tabsToSave = new ArrayList<>();
+        for (Tab tab : tabPane.getTabs()) {
+            TabInfo tabInfo = (TabInfo) tab.getUserData();
+            String content = tabPane.getTabContent(tab);
+            tabsToSave.add(new TabInfo(tabInfo.getTitle(), content, tabInfo.getFilePath()));
+        }
+        SessionManager.saveSession(tabsToSave);
     }
 }
