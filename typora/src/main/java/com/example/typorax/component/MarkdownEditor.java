@@ -3,12 +3,16 @@ package com.example.typora.component;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
-import javafx.geometry.Pos;
+
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -24,12 +28,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
+
 public class MarkdownEditor extends BorderPane {
     private TabPane tabPane;
     private MenuBar menuBar;
     private Stage primaryStage;
     private String lastOpenedDirectory;
     private StatusBar statusBar;
+    private Stage searchReplaceStage;
 
     public MarkdownEditor(Stage stage) {
         this.primaryStage = stage;
@@ -38,11 +48,15 @@ public class MarkdownEditor extends BorderPane {
 
         createMenuBar();
         createStatusBar();
+        createSearchReplaceDialog(stage);
 
         setTop(menuBar);
         setCenter(tabPane);
 
         loadSession();
+
+        // 添加键盘事件处理
+        this.setOnKeyPressed(this::handleKeyPress);
     }
 
     private void createMenuBar() {
@@ -313,5 +327,152 @@ public class MarkdownEditor extends BorderPane {
             tabsToSave.add(new TabInfo(tabInfo.getTitle(), content, tabInfo.getFilePath()));
         }
         SessionManager.saveSession(tabsToSave);
+    }
+
+    private void handleKeyPress(KeyEvent event) {
+        KeyCombination saveCombination = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
+        KeyCombination findCombination = new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN);
+        
+        if (saveCombination.match(event)) {
+            saveCurrentTab();
+            event.consume(); // 防止事件进一步传播
+        } else if (findCombination.match(event)) {
+            showSearchReplaceDialog();
+            event.consume();
+        }
+    }
+
+    private void saveCurrentTab() {
+        Tab currentTab = tabPane.getSelectionModel().getSelectedItem();
+        if (currentTab != null) {
+            TabInfo tabInfo = (TabInfo) currentTab.getUserData();
+            if (tabInfo.isModified()) {
+                String content = getTabContent(currentTab);
+                if (content != null) {
+                    try {
+                        Files.write(Paths.get(tabInfo.getFilePath()), content.getBytes());
+                        tabInfo.setModified(false);
+                        updateTabTitle(currentTab);
+                        // 可以在这里添加一个保存成功的提示，比如更新状态栏
+                        statusBar.showMessage("文件已保存");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        // 显示错误消息
+                        Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                        errorAlert.setTitle("保存错误");
+                        errorAlert.setHeaderText(null);
+                        errorAlert.setContentText("保存文件时发生错误: " + e.getMessage());
+                        errorAlert.showAndWait();
+                    }
+                }
+            }
+        }
+    }
+
+    private void createSearchReplaceDialog(Stage parentStage) {
+        searchReplaceStage = new Stage();
+        searchReplaceStage.initModality(Modality.NONE);
+        searchReplaceStage.initOwner(parentStage);
+        searchReplaceStage.setTitle("查找和替换");
+
+        // 设置对话框的最大化和可调整大小属性
+        searchReplaceStage.setResizable(false); // 禁止调整大小
+        searchReplaceStage.setWidth(300); // 设置宽度为600px
+
+        VBox layout = new VBox(10);
+        layout.setPadding(new Insets(10));
+
+        TextField searchField = new TextField();
+        searchField.setPromptText("查找");
+        TextField replaceField = new TextField();
+        replaceField.setPromptText("替换为");
+
+        Button findButton = new Button("查找下一个");
+        Button replaceButton = new Button("替换");
+        Button replaceAllButton = new Button("全部替换");
+
+        findButton.setOnAction(e -> findNext(searchField.getText()));
+        replaceButton.setOnAction(e -> replace(searchField.getText(), replaceField.getText()));
+        replaceAllButton.setOnAction(e -> replaceAll(searchField.getText(), replaceField.getText()));
+
+        HBox buttonBox = new HBox(10, findButton, replaceButton, replaceAllButton);
+        layout.getChildren().addAll(searchField, replaceField, buttonBox);
+
+        Scene scene = new Scene(layout);
+        scene.getStylesheets().add(getClass().getResource("/application.css").toExternalForm());
+        searchReplaceStage.setScene(scene);
+    }
+
+    private void showSearchReplaceDialog() {
+        if (!searchReplaceStage.isShowing()) {
+            searchReplaceStage.show();
+        } else {
+            searchReplaceStage.requestFocus();
+        }
+    }
+
+    private void findNext(String searchText) {
+        TextArea currentTextArea = getCurrentTextArea();
+        if (currentTextArea != null) {
+            int caretPosition = currentTextArea.getCaretPosition();
+            String text = currentTextArea.getText();
+            int foundIndex = text.indexOf(searchText, caretPosition);
+            if (foundIndex != -1) {
+                currentTextArea.selectRange(foundIndex, foundIndex + searchText.length());
+            } else {
+                // 如果没有找到，从头开始搜索
+                foundIndex = text.indexOf(searchText);
+                if (foundIndex != -1) {
+                    currentTextArea.selectRange(foundIndex, foundIndex + searchText.length());
+                } else {
+                    showAlert("未找到", "找不到 \"" + searchText + "\"");
+                }
+            }
+        }
+    }
+
+    private void replace(String searchText, String replaceText) {
+        TextArea currentTextArea = getCurrentTextArea();
+        if (currentTextArea != null) {
+            if (currentTextArea.getSelectedText().equals(searchText)) {
+                currentTextArea.replaceSelection(replaceText);
+                findNext(searchText);
+            } else {
+                findNext(searchText);
+            }
+        }
+    }
+
+    private void replaceAll(String searchText, String replaceText) {
+        TextArea currentTextArea = getCurrentTextArea();
+        if (currentTextArea != null) {
+            String text = currentTextArea.getText();
+            String newText = text.replace(searchText, replaceText);
+            currentTextArea.setText(newText);
+        }
+    }
+
+    private TextArea getCurrentTextArea() {
+        Tab currentTab = tabPane.getSelectionModel().getSelectedItem();
+        if (currentTab != null) {
+            if (currentTab.getContent() instanceof BorderPane) {
+                BorderPane tabContent = (BorderPane) currentTab.getContent();
+                if (tabContent.getCenter() instanceof SplitPane) {
+                    SplitPane splitPane = (SplitPane) tabContent.getCenter();
+                    return (TextArea) splitPane.getItems().get(0);
+                } else if (tabContent.getCenter() instanceof TextArea) {
+                    return (TextArea) tabContent.getCenter();
+                }
+            }
+        }
+        return null;
+    }
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }

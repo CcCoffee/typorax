@@ -1,4 +1,4 @@
-package com.example.typora.component;
+package com.example.typorax.component;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -11,13 +11,14 @@ public class StatusBar extends HBox {
     private Label statusBarCharCount;
     private Label statusBarEOL;
     private Label statusBarEncoding;
+    private Label messageLabel;
 
     public StatusBar() {
         statusBarLineCol = new Label("行: 1 列: 1");
         statusBarCharCount = new Label("0 个字符");
         statusBarEOL = new Label("Windows (CRLF)");
         statusBarEncoding = new Label("UTF-8");
-
+        messageLabel = new Label();
         this.getChildren().addAll(
             statusBarLineCol,
             new Separator(),
@@ -25,7 +26,8 @@ public class StatusBar extends HBox {
             new Separator(),
             statusBarEOL,
             new Separator(),
-            statusBarEncoding
+            statusBarEncoding,
+            messageLabel
         );
         this.setAlignment(Pos.CENTER_LEFT);
         this.setStyle("-fx-padding: 5; -fx-background-color: #e0e0e0; -fx-border-color: #cccccc; -fx-border-width: 1px 0 0 0;");
@@ -60,5 +62,18 @@ public class StatusBar extends HBox {
         statusBarCharCount.setText("0 个字符");
         statusBarEOL.setText("Windows (CRLF)");
         statusBarEncoding.setText("UTF-8");
+    }
+
+    public void showMessage(String message) {
+        messageLabel.setText(message);
+        // 设置一个定时器，在3秒后清除消息
+        new Thread(() -> {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            javafx.application.Platform.runLater(() -> messageLabel.setText(""));
+        }).start();
     }
 }

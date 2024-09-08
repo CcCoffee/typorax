@@ -12,7 +12,7 @@ public class Main extends Application {
         MarkdownEditor editor = new MarkdownEditor(primaryStage);
         Scene scene = new Scene(editor, 800, 600);
         scene.getStylesheets().add(getClass().getResource("/application.css").toExternalForm());
-        primaryStage.setTitle("Typora-like Markdown Editor");
+        primaryStage.setTitle("Typorax - Kevin's Editor");
         primaryStage.setScene(scene);
         primaryStage.show();
 

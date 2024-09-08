@@ -1,0 +1,163 @@
+/* application.css */
+
+/* 设置整体背景颜色 */
+.root {
+  -fx-background-color: #f5f5f5;
+}
+
+/* 设置Markdown编辑区域的样式 */
+.text-area {
+  -fx-font-family: 'Courier New', monospace;
+  -fx-font-size: 14px;
+  -fx-padding: 10px;
+  -fx-background-color: #ffffff;
+  -fx-background-insets: 0;
+  -fx-background-radius: 0;
+  -fx-border-width: 0;
+  -fx-padding: 5;
+  -fx-focus-color: transparent;
+  -fx-faint-focus-color: transparent;
+}
+
+.text-area .content {
+  -fx-background-color: white;
+  -fx-background-radius: 0;
+}
+
+/* 设置Markdown预览区域的样式 */
+.web-view {
+  -fx-background-color: #ffffff;
+  -fx-border-color: #cccccc;
+  -fx-border-width: 1px;
+  -fx-border-radius: 5px;
+}
+
+/* 设置Markdown预览内容的样式 */
+.web-view .web-view-content {
+  padding: 10px;
+  font-family: 'Arial', sans-serif;
+  font-size: 14px;
+  color: #333333;
+}
+
+/* 设置Markdown预览中的标题样式 */
+.web-view h1,
+.web-view h2,
+.web-view h3,
+.web-view h4,
+.web-view h5,
+.web-view h6 {
+  font-family: 'Georgia', serif;
+  color: #2a2a2a;
+}
+
+/* 设置Markdown预览中的代码块样式 */
+.web-view pre {
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+}
+
+.web-view code {
+  background-color: #f0f0f0;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+/* 设置Markdown预览中的链接样式 */
+.web-view a {
+  color: #1a0dab;
+  text-decoration: none;
+}
+
+.web-view a:hover {
+  text-decoration: underline;
+}
+
+/* Tab styling */
+.tab-pane .tab-header-area .tab-header-background {
+  -fx-background-color: #f0f0f0;
+}
+
+.tab-pane .tab {
+  -fx-background-color: #e0e0e0;
+  -fx-padding: 5px 10px;
+}
+
+.tab-pane .tab:selected {
+  -fx-background-color: #ffffff;
+}
+
+.tab-pane .tab .tab-label {
+  -fx-text-fill: #333333;
+}
+
+.tab-pane .tab:selected .tab-label {
+  -fx-text-fill: #000000;
+}
+
+/* 添加修改指示符样式 */
+.tab-pane .tab .tab-label:contains('⚪') {
+  -fx-text-fill: #333333;
+}
+
+.tab-pane .tab .tab-label:contains('⚪') .text {
+  -fx-fill: #333333;
+}
+
+/* Adjust the split between markdown area and preview */
+.split-pane {
+  -fx-background-color: transparent;
+  -fx-background-insets: 0;
+  -fx-padding: 0;
+}
+
+.split-pane:horizontal > .split-pane-divider {
+  -fx-background-color: transparent;
+  -fx-padding: 0 1px 0 1px;
+}
+
+.split-pane:horizontal > .split-pane-divider:hover {
+  -fx-background-color: #cccccc;
+  -fx-cursor: h-resize;
+}
+
+/* 设置预览区的最小宽度 */
+.split-pane > .web-view {
+  -fx-min-width: 100px;
+}
+
+/* Remove the border from the text area and web view when in split pane */
+.split-pane .text-area,
+.split-pane .web-view {
+  -fx-border-width: 0;
+  -fx-background-insets: 0;
+}
+
+/* ... rest of the styles ... */
+
+/* 搜索和替换对话框样式 */
+.dialog-pane {
+  -fx-background-color: #f5f5f5;
+  -fx-min-width: 300px; /* 设置最小宽度为600px */
+}
+
+.dialog-pane .button {
+  -fx-background-color: #e0e0e0;
+  -fx-text-fill: #333333;
+  -fx-border-color: #cccccc;
+  -fx-border-radius: 3px;
+}
+
+.dialog-pane .button:hover {
+  -fx-background-color: #d0d0d0;
+}
+
+.dialog-pane .text-field {
+  -fx-background-color: #ffffff;
+  -fx-border-color: #cccccc;
+  -fx-border-radius: 3px;
+}
+
+/* ... 其他样式 ... */
