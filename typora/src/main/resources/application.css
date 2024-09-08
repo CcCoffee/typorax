@@ -97,6 +97,15 @@
   -fx-text-fill: #000000;
 }
 
+/* 添加修改指示符样式 */
+.tab-pane .tab .tab-label:contains('⚪') {
+  -fx-text-fill: #333333;
+}
+
+.tab-pane .tab .tab-label:contains('⚪') .text {
+  -fx-fill: #333333;
+}
+
 /* Adjust the split between markdown area and preview */
 .split-pane {
   -fx-background-color: transparent;

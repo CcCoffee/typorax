@@ -120,6 +120,7 @@ public class Main extends Application {
                     updatePreview(newValue, preview);
                     TabInfo tabInfo = (TabInfo) tab.getUserData();
                     tabInfo.setModified(!newValue.equals(tabInfo.getContent()));
+                    updateTabTitle(tab); // 添加这行
                 });
 
                 SplitPane splitPane = new SplitPane();
@@ -129,11 +130,17 @@ public class Main extends Application {
 
                 updatePreview(content, preview);
             } else {
+                editArea.textProperty().addListener((observable, oldValue, newValue) -> {
+                    TabInfo tabInfo = (TabInfo) tab.getUserData();
+                    tabInfo.setModified(!newValue.equals(tabInfo.getContent()));
+                    updateTabTitle(tab); // 添加这行
+                });
                 tabContent.setCenter(editArea);
             }
 
             tab.setContent(tabContent);
             tab.setUserData(new TabInfo(title, content, filePath));
+            updateTabTitle(tab); // 添加这行
             tabPane.getTabs().add(tab);
             tabPane.getSelectionModel().select(tab);
 
@@ -149,13 +156,22 @@ public class Main extends Application {
             });
         }
 
+        private void updateTabTitle(Tab tab) {
+            TabInfo tabInfo = (TabInfo) tab.getUserData();
+            String title = tabInfo.getTitle();
+            if (tabInfo.isModified()) {
+                tab.setText(title + " ⚪");
+            } else {
+                tab.setText(title);
+            }
+        }
+
         private boolean showSaveConfirmation(Tab tab) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("保存");
             alert.setHeaderText(null); // 移除头部文本
             alert.setGraphic(null); // 移除图标
 
-            String fileName = tab.getText();
             String filePath = ((TabInfo) tab.getUserData()).getFilePath();
             alert.setContentText("保存文件 \"" + filePath + "\" ?");
 
