@@ -172,7 +172,19 @@ public class Main extends Application {
 
             Optional<ButtonType> result = alert.showAndWait();
             if (result.get() == buttonTypeYes) {
-                // TODO: 实现保存功能
+                TabInfo tabInfo = (TabInfo) tab.getUserData();
+                String content = ((TextArea) ((BorderPane) tab.getContent()).getLeft()).getText();
+                try {
+                    Files.write(Paths.get(tabInfo.getFilePath()), content.getBytes());
+                    tabInfo.setModified(false);
+                    tab.setText(tabInfo.getTitle());
+                } catch (IOException e) {
+                    Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                    errorAlert.setTitle("保存错误");
+                    errorAlert.setHeaderText(null);
+                    errorAlert.setContentText("保存文件时发生错误: " + e.getMessage());
+                    errorAlert.showAndWait();
+                }
                 return true;
             } else if (result.get() == buttonTypeNo) {
                 return true;
