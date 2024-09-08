@@ -29,10 +29,7 @@ public class MarkdownEditor extends BorderPane {
     private MenuBar menuBar;
     private Stage primaryStage;
     private String lastOpenedDirectory;
-    private Label statusBarLineCol;
-    private Label statusBarCharCount;
-    private Label statusBarEOL;
-    private Label statusBarEncoding;
+    private StatusBar statusBar;
 
     public MarkdownEditor(Stage stage) {
         this.primaryStage = stage;
@@ -72,37 +69,8 @@ public class MarkdownEditor extends BorderPane {
     }
 
     private void createStatusBar() {
-        statusBarLineCol = new Label("行: 1 列: 1");
-        statusBarCharCount = new Label("0 个字符");
-        statusBarEOL = new Label("Windows (CRLF)");
-        statusBarEncoding = new Label("UTF-8");
-
-        HBox statusBarContainer = new HBox(
-                statusBarLineCol,
-                new Separator(),
-                statusBarCharCount,
-                new Separator(),
-                statusBarEOL,
-                new Separator(),
-                statusBarEncoding
-        );
-        statusBarContainer.setAlignment(Pos.CENTER_LEFT);
-        statusBarContainer.setStyle("-fx-padding: 5; -fx-background-color: #e0e0e0; -fx-border-color: #cccccc; -fx-border-width: 1px 0 0 0;");
-        setBottom(statusBarContainer);
-    }
-
-    private void updateStatusBar(TextArea textArea) {
-        int caretPosition = textArea.getCaretPosition();
-        int rowNum = textArea.getText(0, caretPosition).split("\n").length;
-        int colNum = caretPosition - textArea.getText(0, caretPosition).lastIndexOf("\n") - 1;
-        int charCount = textArea.getText().length();
-        String eol = textArea.getText().contains("\r\n") ? "Windows (CRLF)" : "Unix (LF)";
-        String encoding = "UTF-8"; // 假设文件编码为UTF-8
-
-        statusBarLineCol.setText("行: " + rowNum + " 列: " + colNum);
-        statusBarCharCount.setText(charCount + " 个字符");
-        statusBarEOL.setText(eol);
-        statusBarEncoding.setText(encoding);
+        statusBar = new StatusBar();
+        setBottom(statusBar);
     }
 
     private void openFile() {
@@ -189,11 +157,11 @@ public class MarkdownEditor extends BorderPane {
                 TabInfo tabInfo = (TabInfo) tab.getUserData();
                 tabInfo.setModified(!newValue.equals(tabInfo.getContent()));
                 updateTabTitle(tab);
-                updateStatusBar(editArea); // 更新状态栏
+                statusBar.updateStatusBar(editArea); // 更新状态栏
             });
 
             editArea.caretPositionProperty().addListener((obs, oldPos, newPos) -> {
-                updateStatusBar(editArea); // 更新状态栏
+                statusBar.updateStatusBar(editArea); // 更新状态栏
             });
 
             SplitPane splitPane = new SplitPane();
@@ -220,11 +188,11 @@ public class MarkdownEditor extends BorderPane {
                 TabInfo tabInfo = (TabInfo) tab.getUserData();
                 tabInfo.setModified(!newValue.equals(tabInfo.getContent()));
                 updateTabTitle(tab);
-                updateStatusBar(editArea); // 更新状态栏
+                statusBar.updateStatusBar(editArea); // 更新状态栏
             });
 
             editArea.caretPositionProperty().addListener((obs, oldPos, newPos) -> {
-                updateStatusBar(editArea); // 更新状态栏
+                statusBar.updateStatusBar(editArea); // 更新状态栏
             });
 
             tabContent.setCenter(editArea);
@@ -236,7 +204,7 @@ public class MarkdownEditor extends BorderPane {
         tabPane.getTabs().add(tab);
         tabPane.getSelectionModel().select(tab);
 
-        updateStatusBar(editArea); // 初始化状态栏
+        statusBar.updateStatusBar(editArea); // 初始化状态栏
 
         tab.setOnCloseRequest(event -> {
             TabInfo tabInfo = (TabInfo) tab.getUserData();
@@ -283,17 +251,19 @@ public class MarkdownEditor extends BorderPane {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == buttonTypeYes) {
             TabInfo tabInfo = (TabInfo) tab.getUserData();
-            String content = ((TextArea) ((BorderPane) tab.getContent()).getLeft()).getText();
-            try {
-                Files.write(Paths.get(tabInfo.getFilePath()), content.getBytes());
-                tabInfo.setModified(false);
-                tab.setText(tabInfo.getTitle());
-            } catch (IOException e) {
-                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                errorAlert.setTitle("保存错误");
-                errorAlert.setHeaderText(null);
-                errorAlert.setContentText("保存文件时发生错误: " + e.getMessage());
-                errorAlert.showAndWait();
+            String content = getTabContent(tab);
+            if (content != null) {
+                try {
+                    Files.write(Paths.get(tabInfo.getFilePath()), content.getBytes());
+                    tabInfo.setModified(false);
+                    tab.setText(tabInfo.getTitle());
+                } catch (IOException e) {
+                    Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                    errorAlert.setTitle("保存错误");
+                    errorAlert.setHeaderText(null);
+                    errorAlert.setContentText("保存文件时发生错误: " + e.getMessage());
+                    errorAlert.showAndWait();
+                }
             }
             return true;
         } else if (result.get() == buttonTypeNo) {
@@ -301,6 +271,23 @@ public class MarkdownEditor extends BorderPane {
         } else {
             return false;
         }
+    }
+
+    private String getTabContent(Tab tab) {
+        if (tab.getContent() instanceof BorderPane) {
+            BorderPane tabContent = (BorderPane) tab.getContent();
+            if (tabContent.getCenter() instanceof SplitPane) {
+                // Markdown file
+                SplitPane splitPane = (SplitPane) tabContent.getCenter();
+                TextArea markdownArea = (TextArea) splitPane.getItems().get(0);
+                return markdownArea.getText();
+            } else if (tabContent.getCenter() instanceof TextArea) {
+                // Non-Markdown file
+                TextArea textArea = (TextArea) tabContent.getCenter();
+                return textArea.getText();
+            }
+        }
+        return null;
     }
 
     private void updatePreview(String markdown, WebView preview) {
@@ -322,20 +309,7 @@ public class MarkdownEditor extends BorderPane {
         List<TabInfo> tabsToSave = new ArrayList<>();
         for (Tab tab : tabPane.getTabs()) {
             TabInfo tabInfo = (TabInfo) tab.getUserData();
-            String content = "";
-            if (tab.getContent() instanceof BorderPane) {
-                BorderPane tabContent = (BorderPane) tab.getContent();
-                if (tabContent.getCenter() instanceof SplitPane) {
-                    // Markdown file
-                    SplitPane splitPane = (SplitPane) tabContent.getCenter();
-                    TextArea markdownArea = (TextArea) splitPane.getItems().get(0);
-                    content = markdownArea.getText();
-                } else if (tabContent.getCenter() instanceof TextArea) {
-                    // Non-Markdown file
-                    TextArea textArea = (TextArea) tabContent.getCenter();
-                    content = textArea.getText();
-                }
-            }
+            String content = getTabContent(tab);
             tabsToSave.add(new TabInfo(tabInfo.getTitle(), content, tabInfo.getFilePath()));
         }
         SessionManager.saveSession(tabsToSave);
