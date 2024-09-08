@@ -26,6 +26,12 @@ import javafx.application.Platform;
 
 import java.util.Optional;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import java.io.FileReader;
+import java.io.FileWriter;
+
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
@@ -50,10 +56,12 @@ public class Main extends Application {
         private TabPane tabPane;
         private MenuBar menuBar;
         private Stage primaryStage;
+        private String lastOpenedDirectory;
 
         public MarkdownEditor(Stage stage) {
             this.primaryStage = stage;
             tabPane = new TabPane();
+            lastOpenedDirectory = loadLastOpenedDirectory();
 
             createMenuBar();
 
@@ -94,15 +102,54 @@ public class Main extends Application {
                 new FileChooser.ExtensionFilter("Markdown Files", "*.md"),
                 new FileChooser.ExtensionFilter("Text Files", "*.txt")
             );
+
+            // 设置初始目录
+            if (lastOpenedDirectory != null && !lastOpenedDirectory.isEmpty()) {
+                fileChooser.setInitialDirectory(new File(lastOpenedDirectory));
+            }
+
             File selectedFile = fileChooser.showOpenDialog(primaryStage);
             if (selectedFile != null) {
                 try {
                     String content = new String(Files.readAllBytes(Paths.get(selectedFile.getPath())));
                     createNewTab(selectedFile.getName(), content, selectedFile.getAbsolutePath());
+
+                    // 保存新的目录
+                    lastOpenedDirectory = selectedFile.getParent();
+                    saveLastOpenedDirectory(lastOpenedDirectory);
                 } catch (IOException e) {
                     e.printStackTrace();
                     // 在这里可以添加错误处理，比如显示一个错误对话框
                 }
+            }
+        }
+
+        private String loadLastOpenedDirectory() {
+            JSONParser parser = new JSONParser();
+            String userHome = System.getProperty("user.home");
+            String configPath = userHome + File.separator + ".typorax_conf";
+    
+            try (FileReader reader = new FileReader(configPath)) {
+                JSONObject jsonObject = (JSONObject) parser.parse(reader);
+                return (String) jsonObject.get("lastOpenedDirectory");
+            } catch (IOException | ParseException e) {
+                // 如果文件不存在或解析失败，返回null
+                return null;
+            }
+        }
+    
+        private void saveLastOpenedDirectory(String directory) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("lastOpenedDirectory", directory);
+    
+            String userHome = System.getProperty("user.home");
+            String configPath = userHome + File.separator + ".typorax_conf";
+    
+            try (FileWriter file = new FileWriter(configPath)) {
+                file.write(jsonObject.toJSONString());
+                file.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
 
@@ -120,12 +167,25 @@ public class Main extends Application {
                     updatePreview(newValue, preview);
                     TabInfo tabInfo = (TabInfo) tab.getUserData();
                     tabInfo.setModified(!newValue.equals(tabInfo.getContent()));
-                    updateTabTitle(tab); // 添加这行
+                    updateTabTitle(tab);
                 });
 
                 SplitPane splitPane = new SplitPane();
                 splitPane.getItems().addAll(editArea, preview);
-                splitPane.setDividerPositions(0.6); // Set initial split to 60% edit area, 40% preview
+                splitPane.setDividerPositions(0.6); // 设置初始分割比例为60% 编辑区，40% 预览区
+
+                // 设置预览区的最小宽度
+                preview.setMinWidth(100);
+
+                // 添加监听器来限制分隔符的移动
+                splitPane.getDividers().get(0).positionProperty().addListener((obs, oldPos, newPos) -> {
+                    double totalWidth = splitPane.getWidth();
+                    double previewWidth = totalWidth * (1 - newPos.doubleValue());
+                    if (previewWidth < 100) {
+                        splitPane.setDividerPosition(0, 1 - 100 / totalWidth);
+                    }
+                });
+
                 tabContent.setCenter(splitPane);
 
                 updatePreview(content, preview);
@@ -133,14 +193,14 @@ public class Main extends Application {
                 editArea.textProperty().addListener((observable, oldValue, newValue) -> {
                     TabInfo tabInfo = (TabInfo) tab.getUserData();
                     tabInfo.setModified(!newValue.equals(tabInfo.getContent()));
-                    updateTabTitle(tab); // 添加这行
+                    updateTabTitle(tab);
                 });
                 tabContent.setCenter(editArea);
             }
 
             tab.setContent(tabContent);
             tab.setUserData(new TabInfo(title, content, filePath));
-            updateTabTitle(tab); // 添加这行
+            updateTabTitle(tab);
             tabPane.getTabs().add(tab);
             tabPane.getSelectionModel().select(tab);
 

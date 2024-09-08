@@ -123,6 +123,11 @@
   -fx-cursor: h-resize;
 }
 
+/* 设置预览区的最小宽度 */
+.split-pane > .web-view {
+  -fx-min-width: 100px;
+}
+
 /* Remove the border from the text area and web view when in split pane */
 .split-pane .text-area,
 .split-pane .web-view {
