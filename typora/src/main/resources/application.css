@@ -93,10 +93,24 @@
 
 /* Adjust the split between markdown area and preview */
 .split-pane {
-  -fx-divider-position: 0.5;
+  -fx-background-color: transparent;
 }
 
-.split-pane .split-pane-divider {
-  -fx-background-color: #cccccc;
+.split-pane:horizontal > .split-pane-divider {
+  -fx-background-color: #e1e1e1;
   -fx-padding: 1px;
 }
+
+.split-pane:horizontal > .split-pane-divider:hover {
+  -fx-background-color: #cccccc;
+  -fx-cursor: h-resize;
+}
+
+/* Remove the border from the text area and web view when in split pane */
+.split-pane .text-area,
+.split-pane .web-view {
+  -fx-border-width: 0;
+  -fx-background-insets: 0;
+}
+
+/* ... rest of the styles ... */

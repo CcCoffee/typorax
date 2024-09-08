@@ -2,16 +2,13 @@ package com.example.typora;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
-import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,13 +22,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 import javafx.application.Platform;
 
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
 import java.util.Optional;
 
 public class Main extends Application {
@@ -130,8 +122,11 @@ public class Main extends Application {
                     tabInfo.setModified(!newValue.equals(tabInfo.getContent()));
                 });
 
-                tabContent.setLeft(editArea);
-                tabContent.setCenter(preview);
+                SplitPane splitPane = new SplitPane();
+                splitPane.getItems().addAll(editArea, preview);
+                splitPane.setDividerPositions(0.6); // Set initial split to 60% edit area, 40% preview
+                tabContent.setCenter(splitPane);
+
                 updatePreview(content, preview);
             } else {
                 tabContent.setCenter(editArea);
@@ -219,9 +214,21 @@ public class Main extends Application {
             List<TabInfo> tabsToSave = new ArrayList<>();
             for (Tab tab : tabPane.getTabs()) {
                 TabInfo tabInfo = (TabInfo) tab.getUserData();
-                BorderPane tabContent = (BorderPane) tab.getContent();
-                TextArea markdownArea = (TextArea) tabContent.getLeft();
-                tabsToSave.add(new TabInfo(tabInfo.getTitle(), markdownArea.getText(), tabInfo.getFilePath()));
+                String content = "";
+                if (tab.getContent() instanceof BorderPane) {
+                    BorderPane tabContent = (BorderPane) tab.getContent();
+                    if (tabContent.getCenter() instanceof SplitPane) {
+                        // Markdown file
+                        SplitPane splitPane = (SplitPane) tabContent.getCenter();
+                        TextArea markdownArea = (TextArea) splitPane.getItems().get(0);
+                        content = markdownArea.getText();
+                    } else if (tabContent.getCenter() instanceof TextArea) {
+                        // Non-Markdown file
+                        TextArea textArea = (TextArea) tabContent.getCenter();
+                        content = textArea.getText();
+                    }
+                }
+                tabsToSave.add(new TabInfo(tabInfo.getTitle(), content, tabInfo.getFilePath()));
             }
             SessionManager.saveSession(tabsToSave);
         }
