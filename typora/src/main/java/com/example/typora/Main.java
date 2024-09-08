@@ -29,6 +29,11 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.application.Platform;
 
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import java.util.Optional;
+
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
@@ -93,9 +98,9 @@ public class Main extends Application {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("打开文件");
             fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("All Files", "*.*"),
                 new FileChooser.ExtensionFilter("Markdown Files", "*.md"),
-                new FileChooser.ExtensionFilter("Text Files", "*.txt"),
-                new FileChooser.ExtensionFilter("All Files", "*.*")
+                new FileChooser.ExtensionFilter("Text Files", "*.txt")
             );
             File selectedFile = fileChooser.showOpenDialog(primaryStage);
             if (selectedFile != null) {
@@ -118,6 +123,8 @@ public class Main extends Application {
 
             markdownArea.textProperty().addListener((observable, oldValue, newValue) -> {
                 updatePreview(newValue, preview);
+                TabInfo tabInfo = (TabInfo) tab.getUserData();
+                tabInfo.setModified(!newValue.equals(tabInfo.getContent()));
             });
 
             tabContent.setLeft(markdownArea);
@@ -129,6 +136,49 @@ public class Main extends Application {
             tabPane.getSelectionModel().select(tab);
 
             updatePreview(content, preview);
+
+            tab.setOnCloseRequest(event -> {
+                TabInfo tabInfo = (TabInfo) tab.getUserData();
+                if (tabInfo.isModified()) {
+                    if (!showSaveConfirmation(tab)) {
+                        event.consume();
+                    }
+                }
+            });
+        }
+
+        private boolean showSaveConfirmation(Tab tab) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("保存");
+            alert.setHeaderText(null); // 移除头部文本
+            alert.setGraphic(null); // 移除图标
+
+            String fileName = tab.getText();
+            String filePath = ((TabInfo) tab.getUserData()).getFilePath();
+            alert.setContentText("保存文件 \"" + filePath + "\" ?");
+
+            ButtonType buttonTypeYes = new ButtonType("是(Y)", ButtonBar.ButtonData.YES);
+            ButtonType buttonTypeNo = new ButtonType("否(N)", ButtonBar.ButtonData.NO);
+            ButtonType buttonTypeCancel = new ButtonType("取消", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+            alert.getButtonTypes().setAll(buttonTypeYes, buttonTypeNo, buttonTypeCancel);
+
+            // 设置对话框的宽度
+            alert.getDialogPane().setMinWidth(420);
+
+            // 自定义样式
+            alert.getDialogPane().getStylesheets().add(getClass().getResource("/custom-alert.css").toExternalForm());
+            alert.getDialogPane().getStyleClass().add("custom-alert");
+
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.get() == buttonTypeYes) {
+                // TODO: 实现保存功能
+                return true;
+            } else if (result.get() == buttonTypeNo) {
+                return true;
+            } else {
+                return false;
+            }
         }
 
         private void updatePreview(String markdown, WebView preview) {
@@ -163,16 +213,20 @@ public class Main extends Application {
         private String title;
         private String content;
         private String filePath;
+        private boolean modified;
 
         public TabInfo(String title, String content, String filePath) {
             this.title = title;
             this.content = content;
             this.filePath = filePath;
+            this.modified = false;
         }
 
         public String getTitle() { return title; }
         public String getContent() { return content; }
         public String getFilePath() { return filePath; }
+        public boolean isModified() { return modified; }
+        public void setModified(boolean modified) { this.modified = modified; }
     }
 
     static class SessionManager {
