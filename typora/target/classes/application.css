@@ -1,0 +1,70 @@
+/* application.css */
+
+/* 设置整体背景颜色 */
+.root {
+  -fx-background-color: #f5f5f5;
+}
+
+/* 设置Markdown编辑区域的样式 */
+.text-area {
+  -fx-font-family: 'Courier New', monospace;
+  -fx-font-size: 14px;
+  -fx-padding: 10px;
+  -fx-background-color: #ffffff;
+  -fx-border-color: #cccccc;
+  -fx-border-width: 1px;
+  -fx-border-radius: 5px;
+  -fx-focus-color: transparent;
+  -fx-faint-focus-color: transparent;
+}
+
+/* 设置Markdown预览区域的样式 */
+.web-view {
+  -fx-background-color: #ffffff;
+  -fx-border-color: #cccccc;
+  -fx-border-width: 1px;
+  -fx-border-radius: 5px;
+}
+
+/* 设置Markdown预览内容的样式 */
+.web-view .web-view-content {
+  padding: 10px;
+  font-family: 'Arial', sans-serif;
+  font-size: 14px;
+  color: #333333;
+}
+
+/* 设置Markdown预览中的标题样式 */
+.web-view h1,
+.web-view h2,
+.web-view h3,
+.web-view h4,
+.web-view h5,
+.web-view h6 {
+  font-family: 'Georgia', serif;
+  color: #2a2a2a;
+}
+
+/* 设置Markdown预览中的代码块样式 */
+.web-view pre {
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+}
+
+.web-view code {
+  background-color: #f0f0f0;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+/* 设置Markdown预览中的链接样式 */
+.web-view a {
+  color: #1a0dab;
+  text-decoration: none;
+}
+
+.web-view a:hover {
+  text-decoration: underline;
+}
