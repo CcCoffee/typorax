@@ -32,12 +32,18 @@ public class CustomMenuBar extends MenuBar {
         this.getMenus().addAll(fileMenu, editMenu, formatMenu, viewMenu, helpMenu);
 
         Properties config = ConfigLoader.loadConfig();
-        String fileTypes = config.getProperty("file.types", "*.*");
+        String fileTypes = config.getProperty("file.types", "*.*:All Files");
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("打开文件");
+
         for (String fileType : fileTypes.split(",")) {
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(fileType + " Files", fileType));
+            String[] parts = fileType.split(":");
+            if (parts.length == 2) {
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(parts[1], parts[0]));
+            } else {
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(parts[0] + " Files", parts[0]));
+            }
         }
 
         MenuItem openMenuItem = new MenuItem("打开");
@@ -55,11 +61,18 @@ public class CustomMenuBar extends MenuBar {
     private void openFile(Stage primaryStage, CustomTabPane tabPane) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("打开文件");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("All Files", "*.*"),
-                new FileChooser.ExtensionFilter("Markdown Files", "*.md"),
-                new FileChooser.ExtensionFilter("Text Files", "*.txt")
-        );
+
+        Properties config = ConfigLoader.loadConfig();
+        String fileTypes = config.getProperty("file.types", "*.*:All Files");
+
+        for (String fileType : fileTypes.split(",")) {
+            String[] parts = fileType.split(":");
+            if (parts.length == 2) {
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(parts[1], parts[0]));
+            } else {
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(parts[0] + " Files", parts[0]));
+            }
+        }
 
         // 设置初始目录
         if (lastOpenedDirectory != null && !lastOpenedDirectory.isEmpty()) {
