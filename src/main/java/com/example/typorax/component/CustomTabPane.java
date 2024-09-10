@@ -7,6 +7,7 @@ import com.vladsch.flexmark.util.data.MutableDataSet;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
+import javafx.scene.input.MouseEvent;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,6 +20,12 @@ public class CustomTabPane extends TabPane {
 
     public CustomTabPane(StatusBar statusBar) {
         this.statusBar = statusBar;
+        // 添加双击事件监听器
+        this.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+            if (event.getClickCount() == 2 && isDoubleClickOnEmptyTabHeader(event)) {
+                createNewTab("新标签", "", "");
+            }
+        });
     }
 
     public void createNewTab(String title, String content, String filePath) {
@@ -203,5 +210,15 @@ public class CustomTabPane extends TabPane {
             }
         }
         return null;
+    }
+
+    private boolean isDoubleClickOnEmptyTabHeader(MouseEvent event) {
+        // 检查双击是否发生在标签头部的空白处
+        for (Tab tab : getTabs()) {
+            if (tab.getGraphic() != null && tab.getGraphic().getBoundsInParent().contains(event.getX(), event.getY())) {
+                return false;
+            }
+        }
+        return true;
     }
 }
