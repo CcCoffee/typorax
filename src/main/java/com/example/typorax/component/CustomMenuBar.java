@@ -7,6 +7,7 @@ import javafx.stage.Stage;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import com.example.typorax.util.ConfigLoader;
 
 import java.io.File;
 import java.io.FileReader;
@@ -14,6 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Properties;
 
 public class CustomMenuBar extends MenuBar {
 
@@ -28,6 +30,15 @@ public class CustomMenuBar extends MenuBar {
         Menu helpMenu = new Menu("帮助");
 
         this.getMenus().addAll(fileMenu, editMenu, formatMenu, viewMenu, helpMenu);
+
+        Properties config = ConfigLoader.loadConfig();
+        String fileTypes = config.getProperty("file.types", "*.*");
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("打开文件");
+        for (String fileType : fileTypes.split(",")) {
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(fileType + " Files", fileType));
+        }
 
         MenuItem openMenuItem = new MenuItem("打开");
         MenuItem saveMenuItem = new MenuItem("保存");
