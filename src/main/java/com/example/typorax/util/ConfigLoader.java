@@ -8,6 +8,7 @@ import java.util.Properties;
 public class ConfigLoader {
     private static final String USER_CONFIG_DIR = System.getProperty("user.home") + File.separator + ".typorax";
     private static final String USER_CONFIG_PATH = USER_CONFIG_DIR + File.separator + "config.properties";
+    private static final String TEMP_CONFIG_PATH = USER_CONFIG_DIR + File.separator + "temp.properties";
     private static final String DEFAULT_CONFIG_PATH = "/default-config.properties";
 
     public static Properties loadConfig() {
@@ -16,13 +17,39 @@ public class ConfigLoader {
         // 检查并创建用户配置目录和文件
         createUserConfigIfNotExists();
 
-        // 尝试从用户目录加载配置
-        try (InputStream userConfigStream = new FileInputStream(USER_CONFIG_PATH)) {
-            properties.load(userConfigStream);
+        // 加载默认配置
+        properties = loadPropertiesFromResource(DEFAULT_CONFIG_PATH, properties);
+
+        // 加载用户配置
+        properties = loadPropertiesFromFile(USER_CONFIG_PATH, properties);
+
+        // 加载临时配置
+        properties = loadPropertiesFromFile(TEMP_CONFIG_PATH, properties);
+
+        return properties;
+    }
+
+    private static Properties loadPropertiesFromResource(String resourcePath, Properties properties) {
+        try (InputStream resourceStream = ConfigLoader.class.getResourceAsStream(resourcePath)) {
+            if (resourceStream != null) {
+                Properties tempProperties = new Properties();
+                tempProperties.load(resourceStream);
+                properties.putAll(tempProperties);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return properties;
+    }
 
+    private static Properties loadPropertiesFromFile(String filePath, Properties properties) {
+        try (InputStream fileStream = new FileInputStream(filePath)) {
+            Properties tempProperties = new Properties();
+            tempProperties.load(fileStream);
+            properties.putAll(tempProperties);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return properties;
     }
 
@@ -44,6 +71,12 @@ public class ConfigLoader {
                         }
                     }
                 }
+            }
+
+            // 如果临时配置文件不存在，则创建空文件
+            File tempConfigFile = new File(TEMP_CONFIG_PATH);
+            if (!tempConfigFile.exists()) {
+                tempConfigFile.createNewFile();
             }
         } catch (IOException e) {
             e.printStackTrace();

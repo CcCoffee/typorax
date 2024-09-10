@@ -7,7 +7,6 @@ import javafx.stage.Stage;
 import com.example.typorax.util.ConfigLoader;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,7 +18,8 @@ public class CustomMenuBar extends MenuBar {
     private String lastOpenedDirectory;
 
     public CustomMenuBar(Stage primaryStage, CustomTabPane tabPane) {
-        lastOpenedDirectory = loadLastOpenedDirectory();
+        Properties config = ConfigLoader.loadConfig();
+        lastOpenedDirectory = config.getProperty("lastOpenedDirectory");
         Menu fileMenu = new Menu("文件");
         Menu editMenu = new Menu("编辑");
         Menu formatMenu = new Menu("格式");
@@ -28,7 +28,6 @@ public class CustomMenuBar extends MenuBar {
 
         this.getMenus().addAll(fileMenu, editMenu, formatMenu, viewMenu, helpMenu);
 
-        Properties config = ConfigLoader.loadConfig();
         String fileTypes = config.getProperty("file.types", "*.*:All Files");
 
         FileChooser fileChooser = new FileChooser();
@@ -99,20 +98,6 @@ public class CustomMenuBar extends MenuBar {
                 e.printStackTrace();
                 // 在这里可以添加错误处理，比如显示一个错误对话框
             }
-        }
-    }
-
-    private String loadLastOpenedDirectory() {
-        Properties properties = new Properties();
-        String userHome = System.getProperty("user.home");
-        String configPath = userHome + File.separator + ".typorax" + File.separator + "temp.properties";
-
-        try (FileReader reader = new FileReader(configPath)) {
-            properties.load(reader);
-            return properties.getProperty("lastOpenedDirectory");
-        } catch (IOException e) {
-            // 如果文件不存在或解析失败，返回null
-            return null;
         }
     }
 
