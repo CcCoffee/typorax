@@ -1,5 +1,6 @@
 package com.example.typorax.component;
 
+import com.example.typorax.constant.PathContant;
 import com.example.typorax.model.TabInfo;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
@@ -101,7 +102,7 @@ public class CustomMenuBar extends MenuBar {
     private void saveLastOpenedDirectory(String directory) {
         Properties properties = new Properties();
         properties.setProperty("lastOpenedDirectory", directory);
-        try (FileWriter writer = new FileWriter(ConfigLoader.TEMP_CONFIG_PATH)) {
+        try (FileWriter writer = new FileWriter(PathContant.TEMP_CONFIG_PATH)) {
             properties.store(writer, null);
         } catch (IOException e) {
             e.printStackTrace();

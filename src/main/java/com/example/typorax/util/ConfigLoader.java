@@ -5,11 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
 
+import com.example.typorax.constant.PathContant;
+
 public class ConfigLoader {
-    private static final String USER_CONFIG_DIR = System.getProperty("user.home") + File.separator + ".typorax";
-    private static final String USER_CONFIG_PATH = USER_CONFIG_DIR + File.separator + "config.properties";
-    public static final String TEMP_CONFIG_PATH = USER_CONFIG_DIR + File.separator + "temp.properties";
-    private static final String DEFAULT_CONFIG_PATH = "/default-config.properties";
     private static Properties cachedProperties = null;
 
     public static Properties loadConfig() {
@@ -20,13 +18,13 @@ public class ConfigLoader {
             createUserConfigIfNotExists();
 
             // 加载默认配置
-            cachedProperties = loadPropertiesFromResource(DEFAULT_CONFIG_PATH, cachedProperties);
+            cachedProperties = loadPropertiesFromResource(PathContant.DEFAULT_CONFIG_PATH, cachedProperties);
 
             // 加载用户配置
-            cachedProperties = loadPropertiesFromFile(USER_CONFIG_PATH, cachedProperties);
+            cachedProperties = loadPropertiesFromFile(PathContant.USER_CONFIG_PATH, cachedProperties);
 
             // 加载临时配置
-            cachedProperties = loadPropertiesFromFile(TEMP_CONFIG_PATH, cachedProperties);
+            cachedProperties = loadPropertiesFromFile(PathContant.TEMP_CONFIG_PATH, cachedProperties);
         }
         return cachedProperties;
     }
@@ -63,13 +61,13 @@ public class ConfigLoader {
     private static void createUserConfigIfNotExists() {
         try {
             // 创建用户配置目录
-            Files.createDirectories(Paths.get(USER_CONFIG_DIR));
+            Files.createDirectories(Paths.get(PathContant.USER_CONFIG_DIR));
 
             // 如果用户配置文件不存在，则复制默认配置文件
-            File userConfigFile = new File(USER_CONFIG_PATH);
+            File userConfigFile = new File(PathContant.USER_CONFIG_PATH);
             if (!userConfigFile.exists()) {
-                try (InputStream defaultConfigStream = ConfigLoader.class.getResourceAsStream(DEFAULT_CONFIG_PATH);
-                     OutputStream userConfigStream = new FileOutputStream(USER_CONFIG_PATH)) {
+                try (InputStream defaultConfigStream = ConfigLoader.class.getResourceAsStream(PathContant.DEFAULT_CONFIG_PATH);
+                     OutputStream userConfigStream = new FileOutputStream(PathContant.USER_CONFIG_PATH)) {
                     if (defaultConfigStream != null) {
                         byte[] buffer = new byte[1024];
                         int bytesRead;
@@ -81,7 +79,7 @@ public class ConfigLoader {
             }
 
             // 如果临时配置文件不存在，则创建空文件
-            File tempConfigFile = new File(TEMP_CONFIG_PATH);
+            File tempConfigFile = new File(PathContant.TEMP_CONFIG_PATH);
             if (!tempConfigFile.exists()) {
                 tempConfigFile.createNewFile();
             }
