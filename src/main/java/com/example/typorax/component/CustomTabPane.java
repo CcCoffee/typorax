@@ -1,6 +1,7 @@
 package com.example.typorax.component;
 
 import com.example.typorax.model.TabInfo;
+import com.example.typorax.util.ConfigLoader;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
@@ -8,7 +9,10 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.FileChooser;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -23,12 +27,17 @@ public class CustomTabPane extends TabPane {
         // 添加双击事件监听器
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
             if (event.getClickCount() == 2 && isDoubleClickOnEmptyTabHeader(event)) {
-                createNewTab("新标签", "", "");
+                int newTabIndex = getTabs().size() + 1;
+                createNewTab("新文件 " + newTabIndex, "", "", true);
             }
         });
     }
 
     public void createNewTab(String title, String content, String filePath) {
+        createNewTab(title, content, filePath, false);
+    }
+
+    public void createNewTab(String title, String content, String filePath, boolean isTemp) {
         Tab tab = new Tab(title);
         BorderPane tabContent = new BorderPane();
 
@@ -84,8 +93,10 @@ public class CustomTabPane extends TabPane {
             tabContent.setCenter(editArea);
         }
 
+        TabInfo tabInfo = new TabInfo(title, content, filePath);
+        tabInfo.setTemp(isTemp);
         tab.setContent(tabContent);
-        tab.setUserData(new TabInfo(title, content, filePath));
+        tab.setUserData(tabInfo);
         updateTabTitle(tab);
         getTabs().add(tab);
         getSelectionModel().select(tab);
@@ -93,15 +104,19 @@ public class CustomTabPane extends TabPane {
         statusBar.updateStatusBar(editArea); // 初始化状态栏
 
         tab.setOnCloseRequest(event -> {
-            TabInfo tabInfo = (TabInfo) tab.getUserData();
             if (tabInfo.isModified()) {
-                if (!showSaveConfirmation(tab)) {
-                    event.consume();
+                if (tabInfo.isTemp()) {
+                    if (!showSaveAsConfirmation(tab)) {
+                        event.consume();
+                    }
+                } else {
+                    if (!showSaveConfirmation(tab)) {
+                        event.consume();
+                    }
                 }
             }
         });
     }
-
 
     public void saveCurrentTab() {
         Tab currentTab = getSelectionModel().getSelectedItem();
@@ -169,6 +184,61 @@ public class CustomTabPane extends TabPane {
                     Files.write(Paths.get(tabInfo.getFilePath()), content.getBytes());
                     tabInfo.setModified(false);
                     tab.setText(tabInfo.getTitle());
+                } catch (IOException e) {
+                    Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                    errorAlert.setTitle("保存错误");
+                    errorAlert.setHeaderText(null);
+                    errorAlert.setContentText("保存文件时发生错误: " + e.getMessage());
+                    errorAlert.showAndWait();
+                }
+            }
+            return true;
+        } else if (result.get() == buttonTypeNo) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean showSaveAsConfirmation(Tab tab) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("保存");
+        alert.setHeaderText(null); // 移除头部文本
+        alert.setGraphic(null); // 移除图标
+
+        alert.setContentText("保存临时文件 \"" + ((TabInfo) tab.getUserData()).getTitle() + "\" ?");
+
+        ButtonType buttonTypeYes = new ButtonType("是(Y)", ButtonBar.ButtonData.YES);
+        ButtonType buttonTypeNo = new ButtonType("否(N)", ButtonBar.ButtonData.NO);
+        ButtonType buttonTypeCancel = new ButtonType("取消", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(buttonTypeYes, buttonTypeNo, buttonTypeCancel);
+
+        // 设置对话框的宽度
+        alert.getDialogPane().setMinWidth(420);
+
+        // 自定义样式
+        alert.getDialogPane().getStylesheets().add(getClass().getResource("/custom-alert.css").toExternalForm());
+        alert.getDialogPane().getStyleClass().add("custom-alert");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == buttonTypeYes) {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("保存文件");
+            String lastOpenedDirectory = ConfigLoader.loadConfig("lastOpenedDirectory");
+            if (lastOpenedDirectory != null && !lastOpenedDirectory.isEmpty()) {
+                fileChooser.setInitialDirectory(new File(lastOpenedDirectory));
+            }
+            File file = fileChooser.showSaveDialog(getScene().getWindow());
+            if (file != null) {
+                try (FileWriter writer = new FileWriter(file)) {
+                    writer.write(getTabContent(tab));
+                    TabInfo tabInfo = (TabInfo) tab.getUserData();
+                    tabInfo.setFilePath(file.getAbsolutePath());
+                    tabInfo.setModified(false);
+                    tabInfo.setTemp(false);
+                    tab.setText(file.getName());
+                    ConfigLoader.loadConfig().setProperty("lastOpenedDirectory", file.getParent());
                 } catch (IOException e) {
                     Alert errorAlert = new Alert(Alert.AlertType.ERROR);
                     errorAlert.setTitle("保存错误");

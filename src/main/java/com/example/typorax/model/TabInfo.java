@@ -9,6 +9,7 @@ public class TabInfo implements Serializable {
     private String filePath;
     private boolean modified;
     private boolean isMarkdown;
+    private boolean isTemp;
 
     public TabInfo(String title, String content, String filePath) {
         this.title = title;
@@ -16,6 +17,7 @@ public class TabInfo implements Serializable {
         this.filePath = filePath;
         this.modified = false;
         this.isMarkdown = filePath.toLowerCase().endsWith(".md");
+        this.isTemp = false;
     }
 
     public String getTitle() {
@@ -24,6 +26,10 @@ public class TabInfo implements Serializable {
 
     public String getContent() {
         return content;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 
     public String getFilePath() {
@@ -40,5 +46,13 @@ public class TabInfo implements Serializable {
 
     public boolean isMarkdown() {
         return isMarkdown;
+    }
+
+    public boolean isTemp() {
+        return isTemp;
+    }
+
+    public void setTemp(boolean isTemp) {
+        this.isTemp = isTemp;
     }
 }
