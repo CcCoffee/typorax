@@ -7,6 +7,7 @@ import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
@@ -310,11 +311,6 @@ public class CustomTabPane extends TabPane {
 
     private boolean isDoubleClickOnEmptyTabHeader(MouseEvent event) {
         // 检查双击是否发生在标签头部的空白处
-        for (Tab tab : getTabs()) {
-            if (tab.getGraphic() != null && tab.getGraphic().getBoundsInParent().contains(event.getX(), event.getY())) {
-                return false;
-            }
-        }
-        return true;
+        return event.getTarget() instanceof StackPane;
     }
 }
