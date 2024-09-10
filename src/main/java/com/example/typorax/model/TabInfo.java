@@ -20,6 +20,10 @@ public class TabInfo implements Serializable {
         this.isTemp = false;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public String getTitle() {
         return title;
     }

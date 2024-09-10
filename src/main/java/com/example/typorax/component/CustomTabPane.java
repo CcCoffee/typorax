@@ -124,22 +124,28 @@ public class CustomTabPane extends TabPane {
         if (currentTab != null) {
             TabInfo tabInfo = (TabInfo) currentTab.getUserData();
             if (tabInfo.isModified()) {
-                String content = getTabContent(currentTab);
-                if (content != null) {
-                    try {
-                        Files.write(Paths.get(tabInfo.getFilePath()), content.getBytes());
-                        tabInfo.setModified(false);
-                        updateTabTitle(currentTab);
-                        // 可以在这里添加一个保存成功的提示，比如更新状态栏
-                        statusBar.showMessage("文件已保存");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        // 显示错误消息
-                        Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                        errorAlert.setTitle("保存错误");
-                        errorAlert.setHeaderText(null);
-                        errorAlert.setContentText("保存文件时发生错误: " + e.getMessage());
-                        errorAlert.showAndWait();
+                if (tabInfo.isTemp()) {
+                    if (!showSaveAsConfirmation(currentTab)) {
+                        return;
+                    }
+                } else {
+                    String content = getTabContent(currentTab);
+                    if (content != null) {
+                        try {
+                            Files.write(Paths.get(tabInfo.getFilePath()), content.getBytes());
+                            tabInfo.setModified(false);
+                            updateTabTitle(currentTab);
+                            // 可以在这里添加一个保存成功的提示，比如更新状态栏
+                            statusBar.showMessage("文件已保存");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            // 显示错误消息
+                            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                            errorAlert.setTitle("保存错误");
+                            errorAlert.setHeaderText(null);
+                            errorAlert.setContentText("保存文件时发生错误: " + e.getMessage());
+                            errorAlert.showAndWait();
+                        }
                     }
                 }
             }
@@ -256,7 +262,8 @@ public class CustomTabPane extends TabPane {
                     tabInfo.setFilePath(file.getAbsolutePath());
                     tabInfo.setModified(false);
                     tabInfo.setTemp(false);
-                    tab.setText(file.getName());
+                    tabInfo.setTitle(file.getName());
+                    updateTabTitle(tab);
                     ConfigLoader.loadConfig().setProperty("lastOpenedDirectory", file.getParent());
                 } catch (IOException e) {
                     Alert errorAlert = new Alert(Alert.AlertType.ERROR);
