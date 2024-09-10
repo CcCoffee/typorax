@@ -4,9 +4,6 @@ import com.example.typorax.model.TabInfo;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import com.example.typorax.util.ConfigLoader;
 
 import java.io.File;
@@ -106,29 +103,28 @@ public class CustomMenuBar extends MenuBar {
     }
 
     private String loadLastOpenedDirectory() {
-        JSONParser parser = new JSONParser();
+        Properties properties = new Properties();
         String userHome = System.getProperty("user.home");
-        String configPath = userHome + File.separator + ".typorax_conf";
+        String configPath = userHome + File.separator + ".typorax" + File.separator + "temp.properties";
 
         try (FileReader reader = new FileReader(configPath)) {
-            JSONObject jsonObject = (JSONObject) parser.parse(reader);
-            return (String) jsonObject.get("lastOpenedDirectory");
-        } catch (IOException | ParseException e) {
+            properties.load(reader);
+            return properties.getProperty("lastOpenedDirectory");
+        } catch (IOException e) {
             // 如果文件不存在或解析失败，返回null
             return null;
         }
     }
 
     private void saveLastOpenedDirectory(String directory) {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("lastOpenedDirectory", directory);
+        Properties properties = new Properties();
+        properties.setProperty("lastOpenedDirectory", directory);
 
         String userHome = System.getProperty("user.home");
-        String configPath = userHome + File.separator + ".typorax_conf";
+        String configPath = userHome + File.separator + ".typorax" + File.separator + "temp.properties";
 
-        try (FileWriter file = new FileWriter(configPath)) {
-            file.write(jsonObject.toJSONString());
-            file.flush();
+        try (FileWriter writer = new FileWriter(configPath)) {
+            properties.store(writer, null);
         } catch (IOException e) {
             e.printStackTrace();
         }
