@@ -34,6 +34,20 @@ public class ConfigLoader {
         return properties.getProperty(key);
     }
 
+    public static String getFirstSaveableFileType() {
+        String fileTypes = loadConfig("file.types");
+        if (fileTypes != null && !fileTypes.isEmpty()) {
+            String[] types = fileTypes.split(",");
+            for (String type : types) {
+                String[] parts = type.split(":");
+                if (parts.length == 2 && !parts[0].equals("*.*")) {
+                    return parts[0]; // 返回第一个非.*的结果，移除通配符
+                }
+            }
+        }
+        return ".txt"; // 默认返回 .txt
+    }
+
     private static Properties loadPropertiesFromResource(String resourcePath, Properties properties) {
         try (InputStream resourceStream = ConfigLoader.class.getResourceAsStream(resourcePath)) {
             if (resourceStream != null) {

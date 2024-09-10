@@ -10,6 +10,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -229,6 +230,24 @@ public class CustomTabPane extends TabPane {
             if (lastOpenedDirectory != null && !lastOpenedDirectory.isEmpty()) {
                 fileChooser.setInitialDirectory(new File(lastOpenedDirectory));
             }
+            String firstSaveableFileType = ConfigLoader.getFirstSaveableFileType();
+            fileChooser.setInitialFileName(((TabInfo) tab.getUserData()).getTitle() + firstSaveableFileType.replaceFirst("\\*", ""));
+
+            // 从配置中加载可选文件类型，并默认选中firstSaveableFileType类型
+            String fileTypes = ConfigLoader.loadConfig("file.types");
+            if (fileTypes != null && !fileTypes.isEmpty()) {
+                for (String fileType : fileTypes.split(",")) {
+                    String[] parts = fileType.split(":");
+                    if (parts.length == 2) {
+                        FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(parts[1], parts[0]);
+                        fileChooser.getExtensionFilters().add(filter);
+                        if (parts[0].equals(firstSaveableFileType)) {
+                            fileChooser.setSelectedExtensionFilter(filter);
+                        }
+                    }
+                }
+            }
+
             File file = fileChooser.showSaveDialog(getScene().getWindow());
             if (file != null) {
                 try (FileWriter writer = new FileWriter(file)) {
