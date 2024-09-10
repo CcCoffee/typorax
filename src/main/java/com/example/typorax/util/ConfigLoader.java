@@ -8,25 +8,32 @@ import java.util.Properties;
 public class ConfigLoader {
     private static final String USER_CONFIG_DIR = System.getProperty("user.home") + File.separator + ".typorax";
     private static final String USER_CONFIG_PATH = USER_CONFIG_DIR + File.separator + "config.properties";
-    private static final String TEMP_CONFIG_PATH = USER_CONFIG_DIR + File.separator + "temp.properties";
+    public static final String TEMP_CONFIG_PATH = USER_CONFIG_DIR + File.separator + "temp.properties";
     private static final String DEFAULT_CONFIG_PATH = "/default-config.properties";
+    private static Properties cachedProperties = null;
 
     public static Properties loadConfig() {
-        Properties properties = new Properties();
+        if (cachedProperties == null) {
+            cachedProperties = new Properties();
 
-        // 检查并创建用户配置目录和文件
-        createUserConfigIfNotExists();
+            // 检查并创建用户配置目录和文件
+            createUserConfigIfNotExists();
 
-        // 加载默认配置
-        properties = loadPropertiesFromResource(DEFAULT_CONFIG_PATH, properties);
+            // 加载默认配置
+            cachedProperties = loadPropertiesFromResource(DEFAULT_CONFIG_PATH, cachedProperties);
 
-        // 加载用户配置
-        properties = loadPropertiesFromFile(USER_CONFIG_PATH, properties);
+            // 加载用户配置
+            cachedProperties = loadPropertiesFromFile(USER_CONFIG_PATH, cachedProperties);
 
-        // 加载临时配置
-        properties = loadPropertiesFromFile(TEMP_CONFIG_PATH, properties);
+            // 加载临时配置
+            cachedProperties = loadPropertiesFromFile(TEMP_CONFIG_PATH, cachedProperties);
+        }
+        return cachedProperties;
+    }
 
-        return properties;
+    public static String loadConfig(String key) {
+        Properties properties = loadConfig();
+        return properties.getProperty(key);
     }
 
     private static Properties loadPropertiesFromResource(String resourcePath, Properties properties) {

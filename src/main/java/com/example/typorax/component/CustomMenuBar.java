@@ -18,8 +18,7 @@ public class CustomMenuBar extends MenuBar {
     private String lastOpenedDirectory;
 
     public CustomMenuBar(Stage primaryStage, CustomTabPane tabPane) {
-        Properties config = ConfigLoader.loadConfig();
-        lastOpenedDirectory = config.getProperty("lastOpenedDirectory");
+        lastOpenedDirectory = ConfigLoader.loadConfig("lastOpenedDirectory");
         Menu fileMenu = new Menu("文件");
         Menu editMenu = new Menu("编辑");
         Menu formatMenu = new Menu("格式");
@@ -28,8 +27,7 @@ public class CustomMenuBar extends MenuBar {
 
         this.getMenus().addAll(fileMenu, editMenu, formatMenu, viewMenu, helpMenu);
 
-        String fileTypes = config.getProperty("file.types", "*.*:All Files");
-
+        String fileTypes = ConfigLoader.loadConfig("file.types");
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("打开文件");
 
@@ -58,8 +56,7 @@ public class CustomMenuBar extends MenuBar {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("打开文件");
 
-        Properties config = ConfigLoader.loadConfig();
-        String fileTypes = config.getProperty("file.types", "*.*:All Files");
+        String fileTypes = ConfigLoader.loadConfig("file.types");
 
         for (String fileType : fileTypes.split(",")) {
             String[] parts = fileType.split(":");
@@ -104,11 +101,7 @@ public class CustomMenuBar extends MenuBar {
     private void saveLastOpenedDirectory(String directory) {
         Properties properties = new Properties();
         properties.setProperty("lastOpenedDirectory", directory);
-
-        String userHome = System.getProperty("user.home");
-        String configPath = userHome + File.separator + ".typorax" + File.separator + "temp.properties";
-
-        try (FileWriter writer = new FileWriter(configPath)) {
+        try (FileWriter writer = new FileWriter(ConfigLoader.TEMP_CONFIG_PATH)) {
             properties.store(writer, null);
         } catch (IOException e) {
             e.printStackTrace();
