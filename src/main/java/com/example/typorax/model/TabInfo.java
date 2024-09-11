@@ -11,13 +11,13 @@ public class TabInfo implements Serializable {
     private boolean isMarkdown;
     private boolean isTemp;
 
-    public TabInfo(String title, String content, String filePath) {
+    public TabInfo(String title, String content, String filePath, boolean modified, boolean isTemp) {
         this.title = title;
         this.content = content;
         this.filePath = filePath;
-        this.modified = false;
+        this.modified = modified;
         this.isMarkdown = filePath.toLowerCase().endsWith(".md");
-        this.isTemp = false;
+        this.isTemp = isTemp;
     }
 
     public void setTitle(String title) {

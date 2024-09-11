@@ -62,7 +62,7 @@ public class MarkdownEditor extends BorderPane {
                 }
             }
             boolean isModified = !tabInfo.getContent().equals(fileContent);
-            tabPane.createNewTab(tabInfo.getTitle(), tabInfo.getContent(), tabInfo.getFilePath(), false, isModified);
+            tabPane.createNewTab(tabInfo.getTitle(), tabInfo.getContent(), tabInfo.getFilePath(), tabInfo.isTemp(), isModified);
         }
     }
 

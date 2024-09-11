@@ -117,9 +117,7 @@ public class CustomTabPane extends TabPane {
             tabContent.setCenter(editArea);
         }
 
-        TabInfo tabInfo = new TabInfo(title, content, filePath);
-        tabInfo.setTemp(isTemp);
-        tabInfo.setModified(modified);
+        TabInfo tabInfo = new TabInfo(title, content, filePath, modified, isTemp);
         tab.setContent(tabContent);
         tab.setUserData(tabInfo);
         updateTabTitle(tab);
