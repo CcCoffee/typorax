@@ -76,4 +76,12 @@ public class StatusBar extends HBox {
             javafx.application.Platform.runLater(() -> messageLabel.setText(""));
         }).start();
     }
+
+    public void showAIRewriteStatus(boolean isRewriting) {
+        if (isRewriting) {
+            showMessage("正在进行AI重写，请稍候...");
+        } else {
+            showMessage("AI重写完成");
+        }
+    }
 }

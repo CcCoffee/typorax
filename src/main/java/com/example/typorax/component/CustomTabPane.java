@@ -72,7 +72,7 @@ public class CustomTabPane extends TabPane {
         WebView preview = new WebView();
 
         // 使用新的CustomContextMenu类
-        CustomContextMenu contextMenu = new CustomContextMenu(editArea);
+        CustomContextMenu contextMenu = new CustomContextMenu(editArea, statusBar);
         editArea.setContextMenu(contextMenu);
 
         boolean isMarkdown = filePath.toLowerCase().endsWith(".md");

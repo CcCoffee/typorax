@@ -19,15 +19,17 @@ import java.util.List;
 
 public class MarkdownEditor extends BorderPane {
     private final CustomTabPane tabPane;
+    private final StatusBar statusBar;
 
     public MarkdownEditor(Stage stage) {
-        tabPane = new CustomTabPane(createStatusBar());
+        statusBar = createStatusBar();
+        tabPane = new CustomTabPane(statusBar);
         CustomMenuBar menuBar = new CustomMenuBar(stage, tabPane);
         QueryAndReplaceManager.createSearchReplaceDialog(stage, tabPane);
         setTop(menuBar);
         setCenter(tabPane);
+        setBottom(statusBar);
         loadSession();
-        // 添加键盘事件处理
         this.setOnKeyPressed(this::handleKeyPress);
     }
 
@@ -45,9 +47,7 @@ public class MarkdownEditor extends BorderPane {
     }
 
     private StatusBar createStatusBar() {
-        StatusBar statusBar = new StatusBar();
-        setBottom(statusBar);
-        return statusBar;
+        return new StatusBar();
     }
 
     private void loadSession() {

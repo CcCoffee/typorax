@@ -23,9 +23,10 @@ public class CustomContextMenu extends ContextMenu {
     private final MenuItem pasteItem;
     private final MenuItem selectAllItem;
     private final MenuItem aiRewriteItem;
+    private final StatusBar statusBar;
 
-    public CustomContextMenu(TextArea editArea) {
-
+    public CustomContextMenu(TextArea editArea, StatusBar statusBar) {
+        this.statusBar = statusBar;
         copyItem = new MenuItem("复制");
         copyItem.setOnAction(event -> editArea.copy());
 
@@ -51,29 +52,32 @@ public class CustomContextMenu extends ContextMenu {
     private void handleAIRewrite(TextArea editArea) {
         String selectedText = editArea.getSelectedText();
         if (selectedText.isEmpty()) {
-            selectedText = editArea.getText();
+            return;
         }
 
-        // 显示加载提示
+        int start = editArea.getSelection().getStart();
+        int end = editArea.getSelection().getEnd();
+
         editArea.setDisable(true);
         String originalText = selectedText;
-        editArea.setText("正在进行AI重写，请稍候...");
+        statusBar.showAIRewriteStatus(true);
 
         AIRewriteUtil.rewriteText(selectedText).thenAccept(rewrittenText -> {
             Platform.runLater(() -> {
-                showDiffWithButtons(editArea, originalText, rewrittenText);
+                showDiffWithButtons(editArea, originalText, rewrittenText, start, end);
                 editArea.setDisable(false);
+                statusBar.showAIRewriteStatus(false);
             });
         }).exceptionally(e -> {
             Platform.runLater(() -> {
-                editArea.setText("AI重写失败: " + e.getMessage() + "\n原文本：\n" + originalText);
+                statusBar.showMessage("AI重写失败: " + e.getMessage());
                 editArea.setDisable(false);
             });
             return null;
         });
     }
 
-    private void showDiffWithButtons(TextArea editArea, String originalText, String rewrittenText) {
+    private void showDiffWithButtons(TextArea editArea, String originalText, String rewrittenText, int start, int end) {
         CodeArea codeArea = new CodeArea();
         codeArea.setStyle("-fx-font-family: monospace;");
         codeArea.replaceText(rewrittenText);
@@ -93,11 +97,12 @@ public class CustomContextMenu extends ContextMenu {
         popup.setAutoHide(true);
 
         applyButton.setOnAction(event -> {
-            editArea.setText(rewrittenText);
+            editArea.replaceText(start, end, rewrittenText);
             popup.hide();
         });
 
         undoButton.setOnAction(event -> {
+            editArea.replaceText(start, end, originalText);
             popup.hide();
         });
 
