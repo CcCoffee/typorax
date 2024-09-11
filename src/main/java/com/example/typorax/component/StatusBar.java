@@ -95,9 +95,9 @@ public class StatusBar extends HBox {
 
     public void showAIRewriteStatus(boolean isRewriting) {
         if (isRewriting) {
-            showMessage("正在进行AI重写，请稍候...", 0);
+            showMessage("正在进行AI修正，请稍候...", 0);
         } else {
-            showMessage("AI重写完成", 3000);
+            showMessage("AI修正完成", 3000);
         }
     }
 }

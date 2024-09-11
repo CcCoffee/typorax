@@ -1,14 +1,60 @@
 .code-area {
-  -fx-font-family: monospace;
+  -fx-font-family: 'Consolas', 'Courier New', monospace;
+  -fx-font-size: 14px;
 }
 
 .code-area .changed {
-  -fx-background-color: #ffe6e6;
-  -fx-fill: #cc0000;
+  -fx-background-color: #fff0f0;
+  -fx-fill: #ff6b6b;
 }
 
 .diff-container {
   -fx-background-color: white;
-  -fx-border-color: gray;
+  -fx-border-color: #e0e0e0;
   -fx-border-width: 1;
+  -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 10, 0, 0, 2);
+  -fx-background-radius: 5;
+  -fx-border-radius: 5;
+  -fx-min-width: 400px;
+  -fx-min-height: 300px;
+}
+
+.diff-header {
+  -fx-background-color: #f8f9fa;
+  -fx-padding: 10px;
+  -fx-border-color: #e0e0e0;
+  -fx-border-width: 0 0 1 0;
+  -fx-cursor: move;
+}
+
+.diff-content {
+  -fx-padding: 10px;
+}
+
+.diff-footer {
+  -fx-padding: 10px;
+  -fx-border-color: #e0e0e0;
+  -fx-border-width: 1 0 0 0;
+  -fx-alignment: center;
+}
+
+.button {
+  -fx-background-color: #007bff;
+  -fx-text-fill: white;
+  -fx-font-weight: bold;
+  -fx-padding: 5px 10px;
+  -fx-background-radius: 3;
+  -fx-min-width: 80px;
+}
+
+.button:hover {
+  -fx-background-color: #0056b3;
+}
+
+.button.cancel {
+  -fx-background-color: #6c757d;
+}
+
+.button.cancel:hover {
+  -fx-background-color: #545b62;
 }

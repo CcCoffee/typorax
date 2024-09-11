@@ -69,6 +69,8 @@ public class CustomTabPane extends TabPane {
         BorderPane tabContent = new BorderPane();
 
         TextArea editArea = new TextArea(content);
+        editArea.setWrapText(true);  // 添加这一行来启用自动换行
+        
         WebView preview = new WebView();
 
         // 使用新的CustomContextMenu类

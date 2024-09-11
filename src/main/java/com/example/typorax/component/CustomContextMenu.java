@@ -10,8 +10,10 @@ import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 import javafx.stage.Popup;
-import javafx.geometry.Insets;
 import javafx.stage.Window;
+import org.fxmisc.flowless.VirtualizedScrollPane;
+import javafx.scene.layout.Priority;
+import javafx.geometry.Pos;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -36,7 +38,7 @@ public class CustomContextMenu extends ContextMenu {
         selectAllItem = new MenuItem("全选");
         selectAllItem.setOnAction(event -> editArea.selectAll());
 
-        aiRewriteItem = new MenuItem("AI重写");
+        aiRewriteItem = new MenuItem("AI修正");
         aiRewriteItem.setOnAction(event -> handleAIRewrite(editArea));
 
         getItems().addAll(copyItem, pasteItem, selectAllItem, new SeparatorMenuItem(), aiRewriteItem);
@@ -69,7 +71,7 @@ public class CustomContextMenu extends ContextMenu {
             });
         }).exceptionally(e -> {
             Platform.runLater(() -> {
-                statusBar.showMessage("AI重写失败: " + e.getMessage());
+                statusBar.showMessage("AI修正失败: " + e.getMessage());
                 editArea.setDisable(false);
             });
             return null;
@@ -82,22 +84,53 @@ public class CustomContextMenu extends ContextMenu {
         codeArea.replaceText(rewrittenText);
         StyleSpans<Collection<String>> highlighting = computeHighlighting(originalText, rewrittenText);
         codeArea.setStyleSpans(0, highlighting);
+        
+        codeArea.setWrapText(true);
+
+        VirtualizedScrollPane<CodeArea> scrollPane = new VirtualizedScrollPane<>(codeArea);
 
         Button applyButton = new Button("应用");
         Button undoButton = new Button("撤销");
+        undoButton.getStyleClass().add("cancel");
 
         HBox buttonBox = new HBox(10, applyButton, undoButton);
-        VBox container = new VBox(10, buttonBox, codeArea);
-        container.setPadding(new Insets(10));
+        buttonBox.setAlignment(Pos.CENTER);
+        
+        Label headerLabel = new Label("AI 修正结果");
+        headerLabel.getStyleClass().add("header-label");
+        
+        HBox header = new HBox(headerLabel);
+        header.getStyleClass().add("diff-header");
+        header.setAlignment(Pos.CENTER_LEFT);
+        
+        VBox content = new VBox(scrollPane);
+        content.getStyleClass().add("diff-content");
+        
+        HBox footer = new HBox(buttonBox);
+        footer.getStyleClass().add("diff-footer");
+        
+        VBox container = new VBox(header, content, footer);
         container.getStyleClass().add("diff-container");
+
+        VBox.setVgrow(content, Priority.ALWAYS);
 
         Popup popup = new Popup();
         popup.getContent().add(container);
         popup.setAutoHide(true);
 
-        // 加载CSS文件
         String cssPath = getClass().getResource("/context-menu.css").toExternalForm();
         container.getStylesheets().add(cssPath);
+
+        // 设置拖动功能
+        final Delta dragDelta = new Delta();
+        header.setOnMousePressed(mouseEvent -> {
+            dragDelta.x = popup.getX() - mouseEvent.getScreenX();
+            dragDelta.y = popup.getY() - mouseEvent.getScreenY();
+        });
+        header.setOnMouseDragged(mouseEvent -> {
+            popup.setX(mouseEvent.getScreenX() + dragDelta.x);
+            popup.setY(mouseEvent.getScreenY() + dragDelta.y);
+        });
 
         applyButton.setOnAction(event -> {
             editArea.replaceText(start, end, rewrittenText);
@@ -112,6 +145,9 @@ public class CustomContextMenu extends ContextMenu {
         // 设置 Popup 的大小
         container.setPrefWidth(editArea.getWidth() * 0.8);
         container.setPrefHeight(editArea.getHeight() * 0.8);
+
+        // 绑定codeArea的宽度到scrollPane的宽度
+        codeArea.prefWidthProperty().bind(scrollPane.widthProperty());
 
         // 显示 Popup
         Window window = editArea.getScene().getWindow();
@@ -144,5 +180,10 @@ public class CustomContextMenu extends ContextMenu {
         }
         
         return spansBuilder.create();
+    }
+
+    // 用于跟踪拖动的辅助类
+    private static class Delta {
+        double x, y;
     }
 }
