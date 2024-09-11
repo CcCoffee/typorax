@@ -10,6 +10,10 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 public class MarkdownEditor extends BorderPane {
@@ -48,12 +52,21 @@ public class MarkdownEditor extends BorderPane {
     private void loadSession() {
         List<TabInfo> savedTabs = SessionManager.loadSession();
         for (TabInfo tabInfo : savedTabs) {
-            tabPane.createNewTab(tabInfo.getTitle(), tabInfo.getContent(), tabInfo.getFilePath());
+            String filePath = tabInfo.getFilePath();
+            String fileContent = "";
+            if (filePath != null && new File(filePath).exists()) {
+                try {
+                    fileContent = new String(Files.readAllBytes(Paths.get(filePath)));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            boolean isModified = !tabInfo.getContent().equals(fileContent);
+            tabPane.createNewTab(tabInfo.getTitle(), tabInfo.getContent(), tabInfo.getFilePath(), false, isModified);
         }
     }
 
     public void saveSession() {
         SessionManager.saveSession(tabPane);
     }
-
 }

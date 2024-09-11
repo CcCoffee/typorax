@@ -30,7 +30,7 @@ public class CustomTabPane extends TabPane {
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
             if (event.getClickCount() == 2 && isDoubleClickOnEmptyTabHeader(event)) {
                 int newTabIndex = getNextTempFileIndex();
-                createNewTab("新文件 " + newTabIndex, "", "", true);
+                createNewTab("新文件 " + newTabIndex, "", "", true, false);
             }
         });
     }
@@ -54,10 +54,14 @@ public class CustomTabPane extends TabPane {
     }
 
     public void createNewTab(String title, String content, String filePath) {
-        createNewTab(title, content, filePath, false);
+        createNewTab(title, content, filePath, false, false);
     }
 
     public void createNewTab(String title, String content, String filePath, boolean isTemp) {
+        createNewTab(title, content, filePath, isTemp, false);
+    }
+
+    public void createNewTab(String title, String content, String filePath, boolean isTemp, boolean modified) {
         Tab tab = new Tab(title);
         BorderPane tabContent = new BorderPane();
 
@@ -115,6 +119,7 @@ public class CustomTabPane extends TabPane {
 
         TabInfo tabInfo = new TabInfo(title, content, filePath);
         tabInfo.setTemp(isTemp);
+        tabInfo.setModified(modified);
         tab.setContent(tabContent);
         tab.setUserData(tabInfo);
         updateTabTitle(tab);
