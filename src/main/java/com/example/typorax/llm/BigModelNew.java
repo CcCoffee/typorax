@@ -3,6 +3,7 @@ package com.example.typorax.llm;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.example.typorax.util.ConfigLoader;
 import com.google.gson.Gson;
 import okhttp3.*;
 
@@ -17,10 +18,10 @@ import java.util.*;
 public class BigModelNew extends WebSocketListener {
     // 地址与鉴权信息  https://spark-api.xf-yun.com/v1.1/chat   1.5地址  domain参数为general
     // 地址与鉴权信息  https://spark-api.xf-yun.com/v2.1/chat   2.0地址  domain参数为generalv2
-    public static final String hostUrl = "https://spark-api.xf-yun.com/v3.5/chat";
-    public static final String appid = "5b3d5c4a";
-    public static final String apiSecret = "YTRiNjkyYzk0ZTcxOTAyNDc4MjliZTlj";
-    public static final String apiKey = "3c5bdeb7443f2668d5944f4651e8b32e";
+    public static final String hostUrl = ConfigLoader.loadConfig("bigmodel.hostUrl");
+    public static final String appid = ConfigLoader.loadConfig("bigmodel.appid");
+    public static final String apiSecret = ConfigLoader.loadConfig("bigmodel.apiSecret");
+    public static final String apiKey = ConfigLoader.loadConfig("bigmodel.apiKey");
 
     public static List<RoleContent> historyList=new ArrayList<>(); // 对话历史存储集合
 

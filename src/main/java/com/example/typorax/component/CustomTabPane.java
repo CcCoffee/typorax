@@ -1,6 +1,5 @@
 package com.example.typorax.component;
 
-import com.example.typorax.Main;
 import com.example.typorax.model.TabInfo;
 import com.example.typorax.util.ConfigLoader;
 import com.vladsch.flexmark.html.HtmlRenderer;
