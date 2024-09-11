@@ -1,5 +1,6 @@
 package com.example.typorax.component;
 
+import com.example.typorax.Main;
 import com.example.typorax.model.TabInfo;
 import com.example.typorax.util.ConfigLoader;
 import com.vladsch.flexmark.html.HtmlRenderer;
@@ -11,7 +12,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -21,6 +23,8 @@ import java.nio.file.Paths;
 import java.util.Optional;
 
 public class CustomTabPane extends TabPane {
+
+    private static final Logger logger = LoggerFactory.getLogger(CustomTabPane.class);
 
     private final StatusBar statusBar;
 
@@ -332,6 +336,7 @@ public class CustomTabPane extends TabPane {
 
     private boolean isDoubleClickOnEmptyTabHeader(MouseEvent event) {
         // 检查双击是否发生在标签头部的空白处
-        return event.getTarget() instanceof StackPane;
+        logger.info("当前点击的类名：{}", event.getTarget().getClass().getName());
+        return event.getTarget() instanceof StackPane && event.getClickCount() == 2;
     }
 }
