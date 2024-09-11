@@ -9,7 +9,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
-import javafx.scene.input.Clipboard;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import org.slf4j.Logger;
@@ -72,24 +71,8 @@ public class CustomTabPane extends TabPane {
         TextArea editArea = new TextArea(content);
         WebView preview = new WebView();
 
-        // 添加右键菜单
-        ContextMenu contextMenu = new ContextMenu();
-        MenuItem copyItem = new MenuItem("复制");
-        copyItem.setOnAction(event -> editArea.copy());
-        MenuItem pasteItem = new MenuItem("粘贴");
-        pasteItem.setOnAction(event -> editArea.paste());
-        pasteItem.setDisable(true); // 默认设置为不可用
-        editArea.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
-            if (isNowFocused) {
-                pasteItem.setDisable(!Clipboard.getSystemClipboard().hasString());
-            }
-        });
-        MenuItem selectAllItem = new MenuItem("全选");
-        selectAllItem.setOnAction(event -> editArea.selectAll());
-        SeparatorMenuItem separator = new SeparatorMenuItem();
-        MenuItem aiRewriteItem = new MenuItem("AI重写");
-        aiRewriteItem.setOnAction(event -> handleAIRewrite(editArea));
-        contextMenu.getItems().addAll(copyItem, pasteItem, selectAllItem, separator, aiRewriteItem);
+        // 使用新的CustomContextMenu类
+        CustomContextMenu contextMenu = new CustomContextMenu(editArea);
         editArea.setContextMenu(contextMenu);
 
         boolean isMarkdown = filePath.toLowerCase().endsWith(".md");
@@ -358,24 +341,5 @@ public class CustomTabPane extends TabPane {
         // 检查双击是否发生在标签头部的空白处
         logger.info("当前点击的类名：{}", event.getTarget().getClass().getName());
         return event.getTarget() instanceof StackPane && event.getClickCount() == 2;
-    }
-
-    // 添加处理AI重写的方法
-    private void handleAIRewrite(TextArea editArea) {
-        String selectedText = editArea.getSelectedText();
-        if (selectedText.isEmpty()) {
-            // 如果没有选中文本，则使用全部内容
-            selectedText = editArea.getText();
-        }
-
-        // 这里调用AI重写的逻辑，暂时用一个简单的示例替代
-        String rewrittenText = "AI重写后的内容: " + selectedText;
-
-        // 更新编辑区的内容
-        if (editArea.getSelectedText().isEmpty()) {
-            editArea.setText(rewrittenText);
-        } else {
-            editArea.replaceSelection(rewrittenText);
-        }
     }
 }
