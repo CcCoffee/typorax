@@ -5,6 +5,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 
 public class StatusBar extends HBox {
     private final Label statusBarLineCol;
@@ -19,6 +21,11 @@ public class StatusBar extends HBox {
         statusBarEOL = new Label("Windows (CRLF)");
         statusBarEncoding = new Label("UTF-8");
         messageLabel = new Label();
+
+        // 创建一个空的Region来占据中间的空间
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
         this.getChildren().addAll(
             statusBarLineCol,
             new Separator(),
@@ -27,8 +34,10 @@ public class StatusBar extends HBox {
             statusBarEOL,
             new Separator(),
             statusBarEncoding,
+            spacer,
             messageLabel
         );
+
         this.setAlignment(Pos.CENTER_LEFT);
         this.setStyle("-fx-padding: 5; -fx-background-color: #e0e0e0; -fx-border-color: #cccccc; -fx-border-width: 1px 0 0 0;");
     }
