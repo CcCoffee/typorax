@@ -41,10 +41,10 @@ public class CustomTabPane extends TabPane {
             String title = tab.getText();
             if (title.startsWith("新文件 ")) {
                 try {
+                    // replace " ⚪" in the last of title
+                    title = title.replace(" ⚪", "");
                     int index = Integer.parseInt(title.substring(4).trim());
-                    if (index > maxIndex) {
-                        maxIndex = index;
-                    }
+                    maxIndex = Math.max(maxIndex, index);
                 } catch (NumberFormatException e) {
                     // 忽略无法解析的标题
                 }
