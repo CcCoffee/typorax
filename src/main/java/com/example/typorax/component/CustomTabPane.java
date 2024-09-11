@@ -29,10 +29,28 @@ public class CustomTabPane extends TabPane {
         // 添加双击事件监听器
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
             if (event.getClickCount() == 2 && isDoubleClickOnEmptyTabHeader(event)) {
-                int newTabIndex = getTabs().size() + 1;
+                int newTabIndex = getNextTempFileIndex();
                 createNewTab("新文件 " + newTabIndex, "", "", true);
             }
         });
+    }
+
+    private int getNextTempFileIndex() {
+        int maxIndex = 0;
+        for (Tab tab : getTabs()) {
+            String title = tab.getText();
+            if (title.startsWith("新文件 ")) {
+                try {
+                    int index = Integer.parseInt(title.substring(4).trim());
+                    if (index > maxIndex) {
+                        maxIndex = index;
+                    }
+                } catch (NumberFormatException e) {
+                    // 忽略无法解析的标题
+                }
+            }
+        }
+        return maxIndex + 1;
     }
 
     public void createNewTab(String title, String content, String filePath) {
