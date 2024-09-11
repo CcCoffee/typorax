@@ -83,6 +83,12 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.67</version>
         </dependency>
+        <!-- RichTextFX 依赖 -->
+        <dependency>
+            <groupId>org.fxmisc.richtext</groupId>
+            <artifactId>richtextfx</artifactId>
+            <version>0.10.9</version>
+        </dependency>
     </dependencies>
     <pluginRepositories>
         <pluginRepository>

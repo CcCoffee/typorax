@@ -342,4 +342,12 @@ public class CustomTabPane extends TabPane {
         logger.info("当前点击的类名：{}", event.getTarget().getClass().getName());
         return event.getTarget() instanceof StackPane && event.getClickCount() == 2;
     }
+
+    public TextArea getCurrentTextArea() {
+        Tab selectedTab = getSelectionModel().getSelectedItem();
+        if (selectedTab != null) {
+            return (TextArea) ((BorderPane) selectedTab.getContent()).getCenter();
+        }
+        return null;
+    }
 }

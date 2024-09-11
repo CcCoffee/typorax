@@ -3,6 +3,7 @@ package com.example.typorax.component;
 import com.example.typorax.manager.QueryAndReplaceManager;
 import com.example.typorax.manager.SessionManager;
 import com.example.typorax.model.TabInfo;
+import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -68,5 +69,9 @@ public class MarkdownEditor extends BorderPane {
 
     public void saveSession() {
         SessionManager.saveSession(tabPane);
+    }
+
+    public TextArea getCurrentTextArea() {
+        return tabPane.getCurrentTextArea();
     }
 }
