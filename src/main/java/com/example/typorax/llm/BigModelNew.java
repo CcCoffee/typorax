@@ -34,7 +34,7 @@ public class BigModelNew extends WebSocketListener {
 
     // 个性化参数
     private String userId;
-    private Boolean wsCloseFlag;
+    private static Boolean wsCloseFlag;
 
     private static Boolean totalFlag=true; // 控制提示用户是否输入
     // 构造函数
@@ -291,5 +291,24 @@ public class BigModelNew extends WebSocketListener {
         public void setContent(String content) {
             this.content = content;
         }
+    }
+
+    public static String getAIResponse(String question) throws Exception {
+        NewQuestion = question;
+        totalAnswer = "";
+        wsCloseFlag = false;
+
+        String authUrl = getAuthUrl(hostUrl, apiKey, apiSecret);
+        OkHttpClient client = new OkHttpClient.Builder().build();
+        String url = authUrl.replace("http://", "ws://").replace("https://", "wss://");
+        Request request = new Request.Builder().url(url).build();
+
+        WebSocket webSocket = client.newWebSocket(request, new BigModelNew("AIRewrite", false));
+
+        while (!wsCloseFlag) {
+            Thread.sleep(100);
+        }
+
+        return totalAnswer;
     }
 }
