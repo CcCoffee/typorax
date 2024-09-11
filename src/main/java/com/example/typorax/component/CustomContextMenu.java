@@ -79,7 +79,8 @@ public class CustomContextMenu extends ContextMenu {
 
     private void showDiffWithButtons(TextArea editArea, String originalText, String rewrittenText, int start, int end) {
         CodeArea codeArea = new CodeArea();
-        codeArea.setStyle("-fx-font-family: monospace;");
+        codeArea.setStyle("-fx-font-family: monospace; "
+                + ".changed { -fx-background-color: #ffe6e6; -fx-fill: #cc0000; }");
         codeArea.replaceText(rewrittenText);
         StyleSpans<Collection<String>> highlighting = computeHighlighting(originalText, rewrittenText);
         codeArea.setStyleSpans(0, highlighting);
@@ -119,33 +120,27 @@ public class CustomContextMenu extends ContextMenu {
 
     private StyleSpans<Collection<String>> computeHighlighting(String originalText, String rewrittenText) {
         StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
-        String[] originalWords = originalText.split("\\s+");
-        String[] rewrittenWords = rewrittenText.split("\\s+");
-
-        int currentIndex = 0;
-        for (int i = 0; i < rewrittenWords.length; i++) {
-            String word = rewrittenWords[i];
-            if (i < originalWords.length && !word.equals(originalWords[i])) {
-                spansBuilder.add(Collections.singleton("changed"), word.length());
-            } else if (i >= originalWords.length) {
-                spansBuilder.add(Collections.singleton("added"), word.length());
-            } else {
-                spansBuilder.add(Collections.emptyList(), word.length());
-            }
-            currentIndex += word.length();
-            
-            // 为单词之间的空格添加样式
-            if (currentIndex < rewrittenText.length()) {
+        
+        int originalIndex = 0;
+        int rewrittenIndex = 0;
+        
+        while (rewrittenIndex < rewrittenText.length()) {
+            if (originalIndex < originalText.length() && 
+                rewrittenText.charAt(rewrittenIndex) == originalText.charAt(originalIndex)) {
+                // 字符相同，不需要高亮
                 spansBuilder.add(Collections.emptyList(), 1);
-                currentIndex++;
+                rewrittenIndex++;
+                originalIndex++;
+            } else {
+                // 字符不同，需要高亮
+                spansBuilder.add(Collections.singleton("changed"), 1);
+                rewrittenIndex++;
+                if (originalIndex < originalText.length()) {
+                    originalIndex++;
+                }
             }
         }
-
-        // 如果还有剩余文本，将其标记为"added"
-        if (currentIndex < rewrittenText.length()) {
-            spansBuilder.add(Collections.singleton("added"), rewrittenText.length() - currentIndex);
-        }
-
+        
         return spansBuilder.create();
     }
 }
