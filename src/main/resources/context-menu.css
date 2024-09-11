@@ -1,0 +1,14 @@
+.code-area {
+  -fx-font-family: monospace;
+}
+
+.code-area .changed {
+  -fx-background-color: #ffe6e6;
+  -fx-fill: #cc0000;
+}
+
+.diff-container {
+  -fx-background-color: white;
+  -fx-border-color: gray;
+  -fx-border-width: 1;
+}

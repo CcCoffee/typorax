@@ -74,23 +74,30 @@ public class StatusBar extends HBox {
     }
 
     public void showMessage(String message) {
+        showMessage(message, 3000);
+    }
+
+    public void showMessage(String message, long timeout) {
         messageLabel.setText(message);
-        // 设置一个定时器，在3秒后清除消息
-        new Thread(() -> {
+        if (timeout > 0) {
+            new Thread(() -> {
             try {
-                Thread.sleep(3000);
+                Thread.sleep(timeout);
             } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            javafx.application.Platform.runLater(() -> messageLabel.setText(""));
-        }).start();
+                    e.printStackTrace();
+                }
+                javafx.application.Platform.runLater(() -> messageLabel.setText(""));
+            }).start();
+        } else {
+            messageLabel.setText(message);
+        }
     }
 
     public void showAIRewriteStatus(boolean isRewriting) {
         if (isRewriting) {
-            showMessage("正在进行AI重写，请稍候...");
+            showMessage("正在进行AI重写，请稍候...", 0);
         } else {
-            showMessage("AI重写完成");
+            showMessage("AI重写完成", 3000);
         }
     }
 }

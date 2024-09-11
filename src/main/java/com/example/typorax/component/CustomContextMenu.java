@@ -6,7 +6,6 @@ import com.example.typorax.util.AIRewriteUtil;
 import javafx.application.Platform;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
@@ -79,8 +78,7 @@ public class CustomContextMenu extends ContextMenu {
 
     private void showDiffWithButtons(TextArea editArea, String originalText, String rewrittenText, int start, int end) {
         CodeArea codeArea = new CodeArea();
-        codeArea.setStyle("-fx-font-family: monospace; "
-                + ".changed { -fx-background-color: #ffe6e6; -fx-fill: #cc0000; }");
+        codeArea.getStyleClass().add("code-area");
         codeArea.replaceText(rewrittenText);
         StyleSpans<Collection<String>> highlighting = computeHighlighting(originalText, rewrittenText);
         codeArea.setStyleSpans(0, highlighting);
@@ -91,11 +89,15 @@ public class CustomContextMenu extends ContextMenu {
         HBox buttonBox = new HBox(10, applyButton, undoButton);
         VBox container = new VBox(10, buttonBox, codeArea);
         container.setPadding(new Insets(10));
-        container.setStyle("-fx-background-color: white; -fx-border-color: gray; -fx-border-width: 1;");
+        container.getStyleClass().add("diff-container");
 
         Popup popup = new Popup();
         popup.getContent().add(container);
         popup.setAutoHide(true);
+
+        // 加载CSS文件
+        String cssPath = getClass().getResource("/context-menu.css").toExternalForm();
+        container.getStylesheets().add(cssPath);
 
         applyButton.setOnAction(event -> {
             editArea.replaceText(start, end, rewrittenText);
