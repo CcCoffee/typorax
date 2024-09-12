@@ -6,6 +6,7 @@ import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 
+import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
@@ -57,6 +58,7 @@ public class CustomTabPane extends TabPane {
         this.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             hideTabHeaderContextMenu();
         });
+        ensureTabExists();
     }
 
     private int getNextTempFileIndex() {
@@ -166,6 +168,15 @@ public class CustomTabPane extends TabPane {
                     if (!showSaveConfirmation(tab)) {
                         event.consume();
                     }
+                }
+            }
+        });
+
+        // 添加一个新的监听器来处理标签关闭后的情况
+        getTabs().addListener((ListChangeListener<Tab>) c -> {
+            while (c.next()) {
+                if (c.wasRemoved()) {
+                    ensureTabExists();
                 }
             }
         });
@@ -435,5 +446,12 @@ public class CustomTabPane extends TabPane {
             target = target.getParent();
         }
         return false;
+    }
+
+    public void ensureTabExists() {
+        if (getTabs().isEmpty()) {
+            int newTabIndex = getNextTempFileIndex();
+            createNewTab("新文件 " + newTabIndex, "", "", true, false);
+        }
     }
 }
