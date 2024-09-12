@@ -5,10 +5,13 @@ import com.example.typorax.util.ConfigLoader;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
+
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import org.slf4j.Logger;
@@ -26,6 +29,7 @@ public class CustomTabPane extends TabPane {
     private static final Logger logger = LoggerFactory.getLogger(CustomTabPane.class);
 
     private final StatusBar statusBar;
+    private ContextMenu tabHeaderContextMenu;
 
     public CustomTabPane(StatusBar statusBar) {
         this.statusBar = statusBar;
@@ -35,6 +39,23 @@ public class CustomTabPane extends TabPane {
                 int newTabIndex = getNextTempFileIndex();
                 createNewTab("新文件 " + newTabIndex, "", "", true, false);
             }
+        });
+
+        // 初始化上下文菜单
+        initTabHeaderContextMenu();
+
+        // 添加右键点击事件监听器
+        this.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+            if (event.getButton() == MouseButton.SECONDARY && isClickOnTabHeader(event)) {
+                showTabHeaderContextMenu(event);
+            } else {
+                hideTabHeaderContextMenu();
+            }
+        });
+
+        // 添加标签选择变化监听器
+        this.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            hideTabHeaderContextMenu();
         });
     }
 
@@ -341,7 +362,7 @@ public class CustomTabPane extends TabPane {
 
     private boolean isDoubleClickOnEmptyTabHeader(MouseEvent event) {
         // 检查双击是否发生在标签头部的空白处
-        logger.info("当前点击的类名：{}", event.getTarget().getClass().getName());
+        logger.info("Target class name: {}", event.getTarget().getClass().getName());
         return event.getTarget() instanceof StackPane && event.getClickCount() == 2;
     }
 
@@ -351,5 +372,68 @@ public class CustomTabPane extends TabPane {
             return (TextArea) ((BorderPane) selectedTab.getContent()).getCenter();
         }
         return null;
+    }
+
+    private void initTabHeaderContextMenu() {
+        tabHeaderContextMenu = new ContextMenu();
+
+        MenuItem closeCurrentTab = new MenuItem("关闭当前标签");
+        closeCurrentTab.setOnAction(e -> {
+            closeCurrentTab();
+            hideTabHeaderContextMenu();
+        });
+
+        MenuItem closeAllTabs = new MenuItem("关闭所有标签");
+        closeAllTabs.setOnAction(e -> {
+            closeAllTabs();
+            hideTabHeaderContextMenu();
+        });
+
+        MenuItem closeOtherTabs = new MenuItem("关闭其他标签");
+        closeOtherTabs.setOnAction(e -> {
+            closeOtherTabs();
+            hideTabHeaderContextMenu();
+        });
+
+        tabHeaderContextMenu.getItems().addAll(closeCurrentTab, closeAllTabs, closeOtherTabs);
+    }
+
+    private void showTabHeaderContextMenu(MouseEvent event) {
+        tabHeaderContextMenu.show(this, event.getScreenX(), event.getScreenY());
+    }
+
+    private void hideTabHeaderContextMenu() {
+        if (tabHeaderContextMenu != null) {
+            tabHeaderContextMenu.hide();
+        }
+    }
+
+    private void closeCurrentTab() {
+        Tab selectedTab = getSelectionModel().getSelectedItem();
+        if (selectedTab != null) {
+            getTabs().remove(selectedTab);
+        }
+    }
+
+    private void closeAllTabs() {
+        getTabs().clear();
+    }
+
+    private void closeOtherTabs() {
+        Tab selectedTab = getSelectionModel().getSelectedItem();
+        if (selectedTab != null) {
+            getTabs().retainAll(selectedTab);
+        }
+    }
+
+    private boolean isClickOnTabHeader(MouseEvent event) {
+        Node target = (Node) event.getTarget();
+        while (target != null && !(target instanceof TabPane)) {
+            if (target.getStyleClass().contains("tab-header-area")) {
+                return true;
+            }
+            target = target.getParent();
+        }
+        return false;
     }
 }
