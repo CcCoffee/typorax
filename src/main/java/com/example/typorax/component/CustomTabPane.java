@@ -58,7 +58,6 @@ public class CustomTabPane extends TabPane {
         this.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             hideTabHeaderContextMenu();
         });
-        ensureTabExists();
     }
 
     private int getNextTempFileIndex() {

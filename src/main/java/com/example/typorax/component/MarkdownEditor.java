@@ -65,6 +65,11 @@ public class MarkdownEditor extends BorderPane {
             boolean isModified = !tabInfo.getContent().equals(fileContent);
             tabPane.createNewTab(tabInfo.getTitle(), tabInfo.getContent(), tabInfo.getFilePath(), tabInfo.isTemp(), isModified);
         }
+        
+        // 如果没有加载任何标签，则确保创建一个新的临时标签
+        if (savedTabs.isEmpty()) {
+            tabPane.ensureTabExists();
+        }
     }
 
     public void saveSession() {
