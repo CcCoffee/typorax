@@ -1,5 +1,6 @@
 package com.example.typorax.component;
 
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.geometry.Pos;
@@ -11,10 +12,10 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
 public class StatusBar extends HBox {
-    private final Label statusBarLineCol = new Label("行: 1 列: 1");
-    private final Label statusBarCharCount = new Label("0 个字符");
-    private final Label statusBarEOL = new Label("Windows (CRLF)");
-    private final Label statusBarEncoding = new Label("UTF-8");
+    private final Label statusBarLineCol = new Label();
+    private final Label statusBarCharCount = new Label();
+    private final Label statusBarEOL = new Label();
+    private final Label statusBarEncoding = new Label();
     private final Label messageLabel = new Label();
 
     private final StringProperty lineColProperty = new SimpleStringProperty("行: 1 列: 1");
@@ -45,12 +46,12 @@ public class StatusBar extends HBox {
         );
 
         this.setAlignment(Pos.CENTER_LEFT);
-        this.setStyle("-fx-padding: 5; -fx-background-color: #e0e0e0; -fx-border-color: #cccccc; -fx-border-width: 1px 0 0 0;");
+        this.getStyleClass().add("status-bar");
     }
 
     public void updateStatusBar(TextArea textArea) {
         if (textArea == null || textArea.getText() == null) {
-            resetStatusBar();
+            setDefaultStatus();
             return;
         }
 
@@ -65,17 +66,21 @@ public class StatusBar extends HBox {
         String eol = text.contains("\r\n") ? "Windows (CRLF)" : "Unix (LF)";
         String encoding = "UTF-8"; // 假设文件编码为UTF-8
 
-        lineColProperty.set("行: " + rowNum + " 列: " + colNum);
-        charCountProperty.set(charCount + " 个字符");
-        eolProperty.set(eol);
-        encodingProperty.set(encoding);
+        Platform.runLater(() -> {
+            lineColProperty.set("行: " + rowNum + " 列: " + colNum);
+            charCountProperty.set(charCount + " 个字符");
+            eolProperty.set(eol);
+            encodingProperty.set(encoding);
+        });
     }
 
-    private void resetStatusBar() {
-        lineColProperty.set("行: 1 列: 1");
-        charCountProperty.set("0 个字符");
-        eolProperty.set("Windows (CRLF)");
-        encodingProperty.set("UTF-8");
+    private void setDefaultStatus() {
+        Platform.runLater(() -> {
+            lineColProperty.set("行: 1 列: 1");
+            charCountProperty.set("0 个字符");
+            eolProperty.set("Windows (CRLF)");
+            encodingProperty.set("UTF-8");
+        });
     }
 
     public void showMessage(String message) {
@@ -83,15 +88,15 @@ public class StatusBar extends HBox {
     }
 
     public void showMessage(String message, long timeout) {
-        messageLabel.setText(message);
+        Platform.runLater(() -> messageLabel.setText(message));
         if (timeout > 0) {
             new Thread(() -> {
-            try {
-                Thread.sleep(timeout);
-            } catch (InterruptedException e) {
+                try {
+                    Thread.sleep(timeout);
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                javafx.application.Platform.runLater(() -> messageLabel.setText(""));
+                Platform.runLater(() -> messageLabel.setText(""));
             }).start();
         }
     }
