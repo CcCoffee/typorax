@@ -32,7 +32,7 @@ public class SessionManager {
         List<TabInfo> tabsToSave = new ArrayList<>();
         for (Tab tab : tabPane.getTabs()) {
             TabInfo tabInfo = (TabInfo) tab.getUserData();
-            String content = tabPane.getTabContent(tab);
+            String content = tabPane.getTabManager().getTabContent(tab);
             tabsToSave.add(new TabInfo(tabInfo.getTitle(), content, tabInfo.getFilePath(), tabInfo.isModified(), tabInfo.isTemp()));
         }
         SessionManager.saveSession(tabsToSave);

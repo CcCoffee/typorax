@@ -87,7 +87,7 @@ public class CustomMenuBar extends MenuBar {
 
             try {
                 String content = new String(Files.readAllBytes(Paths.get(selectedFile.getPath())));
-                tabPane.createNewTab(selectedFile.getName(), content, selectedFile.getAbsolutePath());
+                tabPane.getTabManager().createNewTab(selectedFile.getName(), content, selectedFile.getAbsolutePath());
 
                 // 保存新的目录
                 lastOpenedDirectory = selectedFile.getParent();
