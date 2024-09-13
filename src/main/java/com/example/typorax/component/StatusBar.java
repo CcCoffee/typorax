@@ -1,5 +1,7 @@
 package com.example.typorax.component;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
@@ -9,20 +11,24 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
 public class StatusBar extends HBox {
-    private final Label statusBarLineCol;
-    private final Label statusBarCharCount;
-    private final Label statusBarEOL;
-    private final Label statusBarEncoding;
-    private final Label messageLabel;
+    private final Label statusBarLineCol = new Label("行: 1 列: 1");
+    private final Label statusBarCharCount = new Label("0 个字符");
+    private final Label statusBarEOL = new Label("Windows (CRLF)");
+    private final Label statusBarEncoding = new Label("UTF-8");
+    private final Label messageLabel = new Label();
+
+    private final StringProperty lineColProperty = new SimpleStringProperty("行: 1 列: 1");
+    private final StringProperty charCountProperty = new SimpleStringProperty("0 个字符");
+    private final StringProperty eolProperty = new SimpleStringProperty("Windows (CRLF)");
+    private final StringProperty encodingProperty = new SimpleStringProperty("UTF-8");
 
     public StatusBar() {
-        statusBarLineCol = new Label("行: 1 列: 1");
-        statusBarCharCount = new Label("0 个字符");
-        statusBarEOL = new Label("Windows (CRLF)");
-        statusBarEncoding = new Label("UTF-8");
-        messageLabel = new Label();
+        // 绑定属性到标签
+        statusBarLineCol.textProperty().bind(lineColProperty);
+        statusBarCharCount.textProperty().bind(charCountProperty);
+        statusBarEOL.textProperty().bind(eolProperty);
+        statusBarEncoding.textProperty().bind(encodingProperty);
 
-        // 创建一个空的Region来占据中间的空间
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
@@ -50,8 +56,7 @@ public class StatusBar extends HBox {
 
         String text = textArea.getText();
         int caretPosition = textArea.getCaretPosition();
-        
-        // 计算行号和列号
+
         int rowNum = (text.isEmpty()) ? 1 : text.substring(0, Math.min(text.length(), caretPosition)).split("\n", -1).length;
         int lastNewlineIndex = text.lastIndexOf('\n', caretPosition - 1);
         int colNum = (lastNewlineIndex == -1) ? caretPosition + 1 : caretPosition - lastNewlineIndex;
@@ -60,17 +65,17 @@ public class StatusBar extends HBox {
         String eol = text.contains("\r\n") ? "Windows (CRLF)" : "Unix (LF)";
         String encoding = "UTF-8"; // 假设文件编码为UTF-8
 
-        statusBarLineCol.setText("行: " + rowNum + " 列: " + colNum);
-        statusBarCharCount.setText(charCount + " 个字符");
-        statusBarEOL.setText(eol);
-        statusBarEncoding.setText(encoding);
+        lineColProperty.set("行: " + rowNum + " 列: " + colNum);
+        charCountProperty.set(charCount + " 个字符");
+        eolProperty.set(eol);
+        encodingProperty.set(encoding);
     }
 
     private void resetStatusBar() {
-        statusBarLineCol.setText("行: 1 列: 1");
-        statusBarCharCount.setText("0 个字符");
-        statusBarEOL.setText("Windows (CRLF)");
-        statusBarEncoding.setText("UTF-8");
+        lineColProperty.set("行: 1 列: 1");
+        charCountProperty.set("0 个字符");
+        eolProperty.set("Windows (CRLF)");
+        encodingProperty.set("UTF-8");
     }
 
     public void showMessage(String message) {
@@ -88,8 +93,6 @@ public class StatusBar extends HBox {
                 }
                 javafx.application.Platform.runLater(() -> messageLabel.setText(""));
             }).start();
-        } else {
-            messageLabel.setText(message);
         }
     }
 
