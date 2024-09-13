@@ -3,6 +3,9 @@ package com.example.typorax.component;
 import com.example.typorax.manager.QueryAndReplaceManager;
 import com.example.typorax.manager.SessionManager;
 import com.example.typorax.model.TabInfo;
+import com.example.typorax.tool.command.Command;
+import com.example.typorax.tool.command.FindCommand;
+import com.example.typorax.tool.command.SaveCommand;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -37,11 +40,15 @@ public class MarkdownEditor extends BorderPane {
         KeyCombination saveCombination = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
         KeyCombination findCombination = new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN);
 
+        Command command = null;
         if (saveCombination.match(event)) {
-            tabPane.saveCurrentTab();
-            event.consume(); // 防止事件进一步传播
+            command = new SaveCommand(tabPane);
         } else if (findCombination.match(event)) {
-            QueryAndReplaceManager.showSearchReplaceDialog();
+            command = new FindCommand();
+        }
+
+        if (command != null) {
+            command.execute();
             event.consume();
         }
     }

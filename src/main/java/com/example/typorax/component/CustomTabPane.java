@@ -58,6 +58,8 @@ public class CustomTabPane extends TabPane {
         this.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             hideTabHeaderContextMenu();
         });
+
+        ensureTabExists();
     }
 
     private int getNextTempFileIndex() {
@@ -162,10 +164,12 @@ public class CustomTabPane extends TabPane {
                 if (tabInfo.isTemp()) {
                     if (!showSaveAsConfirmation(tab)) {
                         event.consume();
+                        return;
                     }
                 } else {
                     if (!showSaveConfirmation(tab)) {
                         event.consume();
+                        return;
                     }
                 }
             }
@@ -427,6 +431,7 @@ public class CustomTabPane extends TabPane {
 
     private void closeAllTabs() {
         getTabs().clear();
+        ensureTabExists();
     }
 
     private void closeOtherTabs() {
