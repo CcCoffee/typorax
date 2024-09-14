@@ -25,7 +25,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TabManager {
+
+    // getLogger
+    private Logger logger = LoggerFactory.getLogger(TabManager.class);
 
     private final CustomTabPane tabPane;
     private final StatusBar statusBar;
@@ -37,6 +43,7 @@ public class TabManager {
 
     public void createNewTemporaryTab() {
         int newTabIndex = getNextTempFileIndex();
+        logger.info("Creating new temporary tab with index: " + newTabIndex);
         createNewTab("新文件 " + newTabIndex, "", "", true, false);
     }
 
@@ -55,6 +62,7 @@ public class TabManager {
                 }
             }
         }
+        logger.info("Next temporary file index: " + (maxIndex + 1));
         return maxIndex + 1;
     }
 

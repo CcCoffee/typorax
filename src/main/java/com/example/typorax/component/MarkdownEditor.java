@@ -6,7 +6,6 @@ import com.example.typorax.model.TabInfo;
 import com.example.typorax.tool.command.Command;
 import com.example.typorax.tool.command.FindCommand;
 import com.example.typorax.tool.command.SaveCommand;
-import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -25,7 +24,7 @@ public class MarkdownEditor extends BorderPane {
     private final StatusBar statusBar;
 
     public MarkdownEditor(Stage stage) {
-        statusBar = createStatusBar();
+        statusBar = new StatusBar();
         tabPane = new CustomTabPane(statusBar);
         CustomMenuBar menuBar = new CustomMenuBar(stage, tabPane);
         QueryAndReplaceManager.createSearchReplaceDialog(stage, tabPane);
@@ -51,10 +50,6 @@ public class MarkdownEditor extends BorderPane {
             command.execute();
             event.consume();
         }
-    }
-
-    private StatusBar createStatusBar() {
-        return new StatusBar();
     }
 
     private void loadSession() {

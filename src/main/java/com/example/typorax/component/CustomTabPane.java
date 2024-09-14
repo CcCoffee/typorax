@@ -16,12 +16,10 @@ public class CustomTabPane extends TabPane {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomTabPane.class);
 
-    private final StatusBar statusBar;
     private final TabHeaderContextMenuManager contextMenuManager;
     private final TabManager tabManager;
 
     public CustomTabPane(StatusBar statusBar) {
-        this.statusBar = statusBar;
         this.contextMenuManager = new TabHeaderContextMenuManager(this);
         this.tabManager = new TabManager(this, statusBar);
 
@@ -54,8 +52,6 @@ public class CustomTabPane extends TabPane {
                 }
             }
         });
-
-        tabManager.ensureAtLeastOneTab();
     }
 
     private boolean isDoubleClickOnEmptyTabHeader(MouseEvent event) {
