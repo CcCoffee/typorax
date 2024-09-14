@@ -348,4 +348,18 @@ public class TabManager {
         errorAlert.setContentText(message);
         errorAlert.showAndWait();
     }
+
+    public void handleFileDrop(File file) {
+        if (file.isFile()) {
+            try {
+                String content = new String(Files.readAllBytes(file.toPath()));
+                String fileName = file.getName();
+                String filePath = file.getAbsolutePath();
+                createNewTab(fileName, content, filePath);
+            } catch (IOException e) {
+                logger.error("读取文件时发生错误: " + e.getMessage(), e);
+                showErrorAlert("文件读取错误", "无法读取文件: " + file.getName());
+            }
+        }
+    }
 }

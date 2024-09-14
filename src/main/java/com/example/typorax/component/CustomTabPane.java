@@ -6,11 +6,15 @@ import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.io.File;
 
 public class CustomTabPane extends TabPane {
 
@@ -52,6 +56,10 @@ public class CustomTabPane extends TabPane {
                 }
             }
         });
+
+        // 添加拖放事件监听器
+        this.setOnDragOver(this::handleDragOver);
+        this.setOnDragDropped(this::handleDragDropped);
     }
 
     private boolean isDoubleClickOnEmptyTabHeader(MouseEvent event) {
@@ -79,5 +87,25 @@ public class CustomTabPane extends TabPane {
         if (getTabs().isEmpty()) {
             tabManager.ensureAtLeastOneTab();
         }
+    }
+
+    private void handleDragOver(DragEvent event) {
+        if (event.getDragboard().hasFiles()) {
+            event.acceptTransferModes(TransferMode.COPY);
+        }
+        event.consume();
+    }
+
+    private void handleDragDropped(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        boolean success = false;
+        if (db.hasFiles()) {
+            for (File file : db.getFiles()) {
+                tabManager.handleFileDrop(file);
+            }
+            success = true;
+        }
+        event.setDropCompleted(success);
+        event.consume();
     }
 }
