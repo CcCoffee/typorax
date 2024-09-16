@@ -121,20 +121,24 @@ public class CustomMenuBar extends MenuBar {
         logger.info("Format JSON");
         Tab selectedTab = tabPane.getSelectionModel().getSelectedItem();
         TextArea textArea = getCurrentTextArea(selectedTab);
-        if (selectedTab != null) {
+        if (selectedTab != null && textArea != null) {
             TabInfo tabInfo = (TabInfo) selectedTab.getUserData();
-            String content = textArea.getText();
+            String selectedText = textArea.getSelectedText();
+            String content = selectedText.isEmpty() ? textArea.getText() : selectedText;
 
             try {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 Object json = gson.fromJson(content, Object.class);
                 String formattedJson = gson.toJson(json);
 
-                // 直接更新TextArea的内容
-                textArea.setText(formattedJson);
+                if (selectedText.isEmpty()) {
+                    textArea.setText(formattedJson);
+                } else {
+                    textArea.replaceSelection(formattedJson);
+                }
 
                 // 更新TabInfo
-                tabInfo.setContent(formattedJson);
+                tabInfo.setContent(textArea.getText());
                 tabInfo.setModified(true);
 
                 // 刷新Tab标题
@@ -156,20 +160,24 @@ public class CustomMenuBar extends MenuBar {
         logger.info("Compress JSON");
         Tab selectedTab = tabPane.getSelectionModel().getSelectedItem();
         TextArea textArea = getCurrentTextArea(selectedTab);
-        if (selectedTab != null) {
+        if (selectedTab != null && textArea != null) {
             TabInfo tabInfo = (TabInfo) selectedTab.getUserData();
-            String content = textArea.getText();
+            String selectedText = textArea.getSelectedText();
+            String content = selectedText.isEmpty() ? textArea.getText() : selectedText;
 
             try {
                 Gson gson = new Gson();
                 Object json = gson.fromJson(content, Object.class);
                 String compressedJson = gson.toJson(json);
 
-                // 直接更新TextArea的内容
-                textArea.setText(compressedJson);
+                if (selectedText.isEmpty()) {
+                    textArea.setText(compressedJson);
+                } else {
+                    textArea.replaceSelection(compressedJson);
+                }
 
                 // 更新TabInfo
-                tabInfo.setContent(compressedJson);
+                tabInfo.setContent(textArea.getText());
                 tabInfo.setModified(true);
 
                 // 刷新Tab标题
