@@ -308,7 +308,7 @@ public class TabManager {
         }
     }
 
-    private void updateTabTitle(Tab tab) {
+    public void updateTabTitle(Tab tab) {
         TabInfo tabInfo = (TabInfo) tab.getUserData();
         String title = tabInfo.getTitle();
         if (tabInfo.isModified()) {

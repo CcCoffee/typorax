@@ -32,6 +32,10 @@ public class TabInfo implements Serializable {
         return content;
     }
 
+    public void setContent(String content) {
+      this.content = content;
+    }
+
     public void setFilePath(String filePath) {
         this.filePath = filePath;
     }
